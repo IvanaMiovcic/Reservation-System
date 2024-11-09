@@ -11,6 +11,9 @@ import ModifyFloorplan from './ModifyFloorplan';
 import ViewSeatingChart from './ViewSeatingChart';
 import ViewQueue from './ViewQueue';
 import SendNotification from './SendNotification';
+import AddTable from './AddTable';
+import ModifyTable from './ModifyTable';
+import RemoveTable from './RemoveTable';
 
 function App() {
   return (
@@ -27,6 +30,9 @@ function App() {
         <Route path="/view-seating-chart" element={<ViewSeatingChart />} />
         <Route path="/view-queue" element={<ViewQueue />} />
         <Route path="/send-notification" element={<SendNotification />} />
+        <Route path="/add-table" element={<AddTable />} />
+        <Route path="/modify-table" element={<ModifyTable />} />
+        <Route path="/remove-table" element={<RemoveTable />} />
       </Routes>
     </Router>
   );
