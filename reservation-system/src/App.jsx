@@ -15,13 +15,14 @@ import AddTable from "./AddTable";
 import ModifyTable from "./ModifyTable";
 import RemoveTable from "./RemoveTable";
 //import Landing from "./Landing";
-import FormScaffold from "./components/FormScaffold";
+//import FormScaffold from "./components/FormScaffold";
+import Container from "./components/Container";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<FormScaffold />} />
+        <Route path="/" element={<Container />} />
         <Route path="/log-in" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/customer-home" element={<CustomerHome />} />

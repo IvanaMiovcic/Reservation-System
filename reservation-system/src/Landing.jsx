@@ -1,6 +1,6 @@
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import Body from "./components/Body";
+import LandingBody from "./components/LandingBody";
 
 export default function Landing() {
   return (
@@ -8,7 +8,7 @@ export default function Landing() {
       <div className="h-screen w-9/12 flex flex-col">
         <Header />
         <div className="flex-grow content-center">
-          <Body />
+          <LandingBody />
         </div>
         <Footer />
       </div>
