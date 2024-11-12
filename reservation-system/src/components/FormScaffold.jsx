@@ -1,6 +1,7 @@
 import Joi from "joi";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { joiResolver } from "@hookform/resolvers/joi";
 import {
@@ -46,18 +47,20 @@ const schema = Joi.object({
     }),
   phone: Joi.string()
     .regex(/^\d{3}-\d{3}-\d{4}$|^\d{10}$/)
+    .allow("")
     .optional()
     .messages({
-      "string.empty": "",
       "string.pattern.base":
-        "Phone number must match either XXXXXXXXXX or XXX-XXX-XXXX",
+        "Phone number must be in one of two formats: 1234567890 or 123-456-7890",
     }),
+  account_type: Joi.string()
+    .valid("customer", "employee", "manager")
+    .required(),
 });
 
 export default function FormScaffold() {
   function onSubmit(data) {
-    data.preventDefault();
-    console.log(data.firstname);
+    console.log(data);
   }
   const form = useForm({
     resolver: joiResolver(schema),
@@ -68,6 +71,7 @@ export default function FormScaffold() {
       repeat_password: "",
       email: "",
       phone: "",
+      account_type: "customer",
     },
   });
 
@@ -90,7 +94,7 @@ export default function FormScaffold() {
                     {...form.register("firstname")}
                   />
                 </FormControl>
-                <FormDescription>This is your first name.</FormDescription>
+                <FormDescription>This is your first name</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -179,6 +183,38 @@ export default function FormScaffold() {
                 </FormControl>
                 <FormDescription>Re-enter your password</FormDescription>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="account_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Tabs
+                    defaultValue={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <TabsList className="grid grid-cols-3 bg-black text-white">
+                      <FormItem className="flex justify-center">
+                        <FormControl className="w-full">
+                          <TabsTrigger value="customer">Customer</TabsTrigger>
+                        </FormControl>
+                      </FormItem>
+                      <FormItem className="flex justify-center">
+                        <FormControl className="w-full">
+                          <TabsTrigger value="employee">Employee</TabsTrigger>
+                        </FormControl>
+                      </FormItem>
+                      <FormItem className="flex justify-center">
+                        <FormControl className="w-full">
+                          <TabsTrigger value="manager">Manager</TabsTrigger>
+                        </FormControl>
+                      </FormItem>
+                    </TabsList>
+                  </Tabs>
+                </FormControl>
               </FormItem>
             )}
           />
