@@ -76,14 +76,16 @@ export default function FormScaffold() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 font-poppins text-white"
           >
-            <div className="text-white text-4xl">Welcome to SmartQ</div>
+            <div className="text-white text-3xl sm:text-4xl">
+              Welcome to SmartQ
+            </div>
             <div className="flex flex-row gap-x-4 justify-evenly">
               <FormField
                 control={form.control}
                 name="firstname"
                 render={({ field }) => (
                   <FormItem className="w-1/2">
-                    <FormControl>
+                    <FormControl className="text-xs sm:text-sm">
                       <Input
                         placeholder="First Name"
                         {...field}
@@ -99,7 +101,7 @@ export default function FormScaffold() {
                 name="lastname"
                 render={({ field }) => (
                   <FormItem className="w-1/2">
-                    <FormControl>
+                    <FormControl className="text-xs sm:text-sm">
                       <Input
                         placeholder="Last Name"
                         {...field}
@@ -116,7 +118,7 @@ export default function FormScaffold() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormControl>
+                  <FormControl className="text-xs sm:text-sm">
                     <Input
                       placeholder="Email"
                       {...field}
@@ -132,7 +134,7 @@ export default function FormScaffold() {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormControl>
+                  <FormControl className="text-xs sm:text-sm">
                     <Input
                       placeholder="Phone"
                       {...field}
@@ -149,7 +151,7 @@ export default function FormScaffold() {
                 name="password"
                 render={({ field }) => (
                   <FormItem className="w-1/2">
-                    <FormControl>
+                    <FormControl className="text-xs sm:text-sm">
                       <Input
                         placeholder="Password"
                         type="password"
@@ -166,7 +168,7 @@ export default function FormScaffold() {
                 name="repeat_password"
                 render={({ field }) => (
                   <FormItem className="w-1/2">
-                    <FormControl>
+                    <FormControl className="text-xs sm:text-sm">
                       <Input
                         type="password"
                         placeholder="Repeat Password"
@@ -191,17 +193,17 @@ export default function FormScaffold() {
                     >
                       <TabsList className="grid grid-cols-3 bg-black text-white">
                         <FormItem className="flex justify-center">
-                          <FormControl className="w-full">
+                          <FormControl className="w-full text-xs sm:text-sm">
                             <TabsTrigger value="customer">Customer</TabsTrigger>
                           </FormControl>
                         </FormItem>
                         <FormItem className="flex justify-center">
-                          <FormControl className="w-full">
+                          <FormControl className="w-full text-xs sm:text-sm">
                             <TabsTrigger value="employee">Employee</TabsTrigger>
                           </FormControl>
                         </FormItem>
                         <FormItem className="flex justify-center">
-                          <FormControl className="w-full">
+                          <FormControl className="w-full text-xs sm:text-sm">
                             <TabsTrigger value="manager">Manager</TabsTrigger>
                           </FormControl>
                         </FormItem>
@@ -211,7 +213,11 @@ export default function FormScaffold() {
                 </FormItem>
               )}
             />
-            <Button className="w-full" variant="secondary" type="submit">
+            <Button
+              className="w-full text-xs sm:text-sm"
+              variant="secondary"
+              type="submit"
+            >
               Create Account
             </Button>
           </form>
