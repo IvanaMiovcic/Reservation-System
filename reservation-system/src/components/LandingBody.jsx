@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function Body() {
+export default function LandingBody() {
   return (
     <div className="flex flex-col items-center font-poppins gap-20">
       <div className="h-5/6 w-9/12 flex flex-col gap-4 items-center text-white">
