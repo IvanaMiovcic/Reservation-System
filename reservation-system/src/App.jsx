@@ -14,15 +14,13 @@ import SendNotification from "./SendNotification";
 import AddTable from "./AddTable";
 import ModifyTable from "./ModifyTable";
 import RemoveTable from "./RemoveTable";
-//import Landing from "./Landing";
-//import FormScaffold from "./components/FormScaffold";
-import Container from "./components/Container";
+import Landing from "./Landing";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Container />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/log-in" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/customer-home" element={<CustomerHome />} />
