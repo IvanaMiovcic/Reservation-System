@@ -1,5 +1,6 @@
 import Logo from "./Logo";
 import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   //function to determine if a user is logged in and currently has a valid sesssion
@@ -9,15 +10,17 @@ export default function Header() {
   };
 
   return (
-    <div className="flex flex-row justify-between pt-10 sm:pb-6">
-      <div className="flex flex-row justify-center items-center gap-2 font-poppins text-white text-xl">
+    <div className="flex flex-row justify-between pt-10 sm:pt-6 border">
+      <div className="flex flex-row justify-center items-center gap-2 font-poppins text-white text-xl border">
         <Logo />
         <div>SmartQ</div>
       </div>
-      <div className="font-poppins">
-        <Button variant="secondary">
-          {isLoggedIn() ? "Dashboard" : "Log In"}
-        </Button>
+      <div className="font-poppins border">
+        <Link>
+          <Button variant="secondary">
+            {isLoggedIn() ? "Dashboard" : "Log In"}
+          </Button>
+        </Link>
       </div>
     </div>
   );
