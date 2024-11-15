@@ -10,12 +10,12 @@ export default function Header() {
   };
 
   return (
-    <div className="flex flex-row justify-between pt-10 sm:pt-6 border">
-      <div className="flex flex-row justify-center items-center gap-2 font-poppins text-white text-xl border">
+    <div className="flex flex-row justify-between pt-10 sm:pt-6">
+      <div className="flex flex-row justify-center items-center gap-2 font-poppins text-white text-xl">
         <Logo />
         <div>SmartQ</div>
       </div>
-      <div className="font-poppins border">
+      <div className="font-poppins">
         <Link>
           <Button variant="secondary">
             {isLoggedIn() ? "Dashboard" : "Log In"}
