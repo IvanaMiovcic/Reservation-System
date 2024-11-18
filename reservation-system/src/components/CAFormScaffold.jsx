@@ -1,10 +1,17 @@
-import Joi from "joi";
+import Joi, { valid } from "joi";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { joiResolver } from "@hookform/resolvers/joi";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+  FormDescription,
+} from "./ui/form";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
 
@@ -13,7 +20,7 @@ const schema = Joi.object({
     "string.empty": "First Name is Required",
     "string.min": "First Name should be at least 2 characters long",
   }),
-  lastname: Joi.string().min(2).allow("").optional().messages({
+  lastname: Joi.string().min(2).required().messages({
     "string.empty": "Last Name is Required",
     "string.min": "Last Name should be at least 2 characters long",
   }),
@@ -21,15 +28,15 @@ const schema = Joi.object({
     .min(8)
     .max(25)
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d!@#$%^&*()-+=,.;'"/?<>{}]{12,}$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d!@#$%^&*()-+=,.;'"/?<>{}]{8,}$/,
     )
     .required()
     .messages({
       "string.empty": "Password is Required",
       "string.pattern.base":
-        "Password should be at least 12 characters long, and contain numbers, uppercase letters, lowercase letters, and special characters",
+        "At least 8 characters with numbers, uppercase, lowercase, and special characters",
       "string.min":
-        "Password should be at least 12 characters long, and contain numbers, uppercase letters, lowercase letters, and special characters",
+        "At least 8 characters with numbers, uppercase, lowercase, and special characters",
     }),
   repeat_password: Joi.ref("password"),
   email: Joi.string()
@@ -41,15 +48,24 @@ const schema = Joi.object({
     }),
   phone: Joi.string()
     .regex(/^\d{3}-\d{3}-\d{4}$|^\d{10}$/)
-    .allow("")
-    .optional()
+    .required()
     .messages({
       "string.pattern.base":
         "Phone number must be in one of two formats: 1234567890 or 123-456-7890",
+      "string.empty": "Phone is Required",
     }),
   account_type: Joi.string()
     .valid("Customer", "Employee", "Manager")
     .required(),
+  restaurant_name: Joi.string()
+    .required()
+    .messages({
+      "string.empty": "Restaurant Name is Required",
+    })
+    .when("account_type", {
+      is: "Customer",
+      then: Joi.string().optional().allow().strip(),
+    }),
 });
 
 export default function CAFormScaffold() {
@@ -66,6 +82,7 @@ export default function CAFormScaffold() {
       email: "",
       phone: "",
       account_type: "Customer",
+      restaurant_name: "",
     },
   });
 
@@ -206,6 +223,56 @@ export default function CAFormScaffold() {
                           </FormControl>
                         </FormItem>
                       </TabsList>
+                      <TabsContent value="Employee">
+                        <FormItem>
+                          <FormControl>
+                            <FormField
+                              control={form.control}
+                              name="restaurant_name"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl className="text-xs sm:text-sm">
+                                    <div className="flex flex-col items-center space-y-2 py-2">
+                                      <Input
+                                        className="w-[98%] border-zinc-600"
+                                        placeholder="Restaurant Name"
+                                        {...field}
+                                        {...form.register("restaurant_name")}
+                                      />
+                                      <FormMessage className="self-start pl-2" />
+                                    </div>
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      </TabsContent>
+                      <TabsContent value="Manager">
+                        <FormItem>
+                          <FormControl>
+                            <FormField
+                              control={form.control}
+                              name="restaurant_name"
+                              render={({ field }) => (
+                                <FormItem className="">
+                                  <FormControl className="text-xs sm:text-sm">
+                                    <div className="flex flex-col items-center space-y-2 py-2">
+                                      <Input
+                                        className="w-[98%] border-zinc-600"
+                                        placeholder="Restaurant Name"
+                                        {...field}
+                                        {...form.register("restaurant_name")}
+                                      />
+                                      <FormMessage className="self-start pl-2" />
+                                    </div>
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      </TabsContent>
                     </Tabs>
                   </FormControl>
                 </FormItem>
