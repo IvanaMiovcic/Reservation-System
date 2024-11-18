@@ -4,14 +4,7 @@ import { useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { joiResolver } from "@hookform/resolvers/joi";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  FormDescription,
-} from "./ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
 
@@ -64,7 +57,7 @@ const schema = Joi.object({
     })
     .when("account_type", {
       is: "Customer",
-      then: Joi.string().optional().allow().strip(),
+      then: Joi.string().optional().allow("").strip(),
     }),
 });
 
@@ -102,6 +95,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
+                        className="border-zinc-400"
                         placeholder="First Name"
                         {...field}
                         {...form.register("firstname")}
@@ -118,6 +112,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
+                        className="border-zinc-400"
                         placeholder="Last Name"
                         {...field}
                         {...form.register("lastname")}
@@ -135,6 +130,7 @@ export default function CAFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
+                      className="border-zinc-400"
                       placeholder="Email"
                       {...field}
                       {...form.register("email")}
@@ -151,6 +147,7 @@ export default function CAFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
+                      className="border-zinc-400"
                       placeholder="Phone"
                       {...field}
                       {...form.register("phone")}
@@ -168,6 +165,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
+                        className="border-zinc-400"
                         placeholder="Password"
                         type="password"
                         {...field}
@@ -185,6 +183,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
+                        className="border-zinc-400"
                         type="password"
                         placeholder="Repeat Password"
                         {...field}
@@ -200,7 +199,7 @@ export default function CAFormScaffold() {
               control={form.control}
               name="account_type"
               render={({ field }) => (
-                <FormItem className="border rounded-md">
+                <FormItem className="border-zinc-400 border rounded-md">
                   <FormControl>
                     <Tabs
                       defaultValue="Customer"
