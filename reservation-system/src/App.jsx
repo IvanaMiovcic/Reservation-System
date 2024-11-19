@@ -14,13 +14,29 @@ import SendNotification from "./SendNotification";
 import AddTable from "./AddTable";
 import ModifyTable from "./ModifyTable";
 import RemoveTable from "./RemoveTable";
-import Landing from "./Landing";
+//import Landing from "./Landing";
+import {
+  SixSeaterAvaiHori,
+  SixSeaterAvaiVerti,
+  SixSeaterTakenHori,
+  SixSeaterTakenVerti,
+} from "./components/SixSeater";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route
+          path="/"
+          element={
+            <div>
+              <SixSeaterAvaiHori />
+              <SixSeaterTakenHori />
+              <SixSeaterAvaiVerti />
+              <SixSeaterTakenVerti />
+            </div>
+          }
+        />
         <Route path="/log-in" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/customer-home" element={<CustomerHome />} />
