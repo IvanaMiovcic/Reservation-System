@@ -49,7 +49,7 @@ export default function LIFormScaffold() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="text-white text-start text-3xl sm:text-4xl">
-              Log In
+              Login
             </div>
             <FormField
               control={form.control}
@@ -58,7 +58,7 @@ export default function LIFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400"
+                      className="border-zinc-400 focus:border-white"
                       placeholder="Email"
                       {...field}
                       {...form.register("email")}
@@ -75,7 +75,7 @@ export default function LIFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400"
+                      className="border-zinc-400 focus:border-white"
                       placeholder="Password"
                       type="password"
                       {...field}

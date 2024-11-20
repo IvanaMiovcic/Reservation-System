@@ -1,4 +1,4 @@
-import Joi, { valid } from "joi";
+import Joi from "joi";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
@@ -95,7 +95,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
-                        className="border-zinc-400"
+                        className="border-zinc-400 focus:border-white"
                         placeholder="First Name"
                         {...field}
                         {...form.register("firstname")}
@@ -112,7 +112,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
-                        className="border-zinc-400"
+                        className="border-zinc-400 focus:border-white"
                         placeholder="Last Name"
                         {...field}
                         {...form.register("lastname")}
@@ -130,7 +130,7 @@ export default function CAFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400"
+                      className="border-zinc-400 focus:border-white"
                       placeholder="Email"
                       {...field}
                       {...form.register("email")}
@@ -147,7 +147,7 @@ export default function CAFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400"
+                      className="border-zinc-400 focus:border-white"
                       placeholder="Phone"
                       {...field}
                       {...form.register("phone")}
@@ -165,7 +165,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
-                        className="border-zinc-400"
+                        className="border-zinc-400 focus:border-white"
                         placeholder="Password"
                         type="password"
                         {...field}
@@ -183,7 +183,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
-                        className="border-zinc-400"
+                        className="border-zinc-400 focus:border-white"
                         type="password"
                         placeholder="Repeat Password"
                         {...field}
@@ -233,7 +233,7 @@ export default function CAFormScaffold() {
                                   <FormControl className="text-xs sm:text-sm">
                                     <div className="flex flex-col items-center space-y-2 py-2">
                                       <Input
-                                        className="w-[98%] border-zinc-600"
+                                        className="w-[98%] border-zinc-600 focus:border-white"
                                         placeholder="Restaurant Name"
                                         {...field}
                                         {...form.register("restaurant_name")}
@@ -258,7 +258,7 @@ export default function CAFormScaffold() {
                                   <FormControl className="text-xs sm:text-sm">
                                     <div className="flex flex-col items-center space-y-2 py-2">
                                       <Input
-                                        className="w-[98%] border-zinc-600"
+                                        className="w-[98%] border-zinc-600 focus:border-white"
                                         placeholder="Restaurant Name"
                                         {...field}
                                         {...form.register("restaurant_name")}

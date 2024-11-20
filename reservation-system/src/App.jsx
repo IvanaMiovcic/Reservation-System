@@ -6,7 +6,7 @@ import CustomerHome from "./CustomerHome";
 import CreateReservation from "./CreateReservation";
 import ModifyReservation from "./ModifyReservation";
 import ViewReservation from "./ViewReservation";
-import EmployeeHome from "./EmployeeHome";
+//import EmployeeHome from "./EmployeeHome";
 import ModifyFloorplan from "./ModifyFloorplan";
 import ViewSeatingChart from "./ViewSeatingChart";
 import ViewQueue from "./ViewQueue";
@@ -15,6 +15,7 @@ import AddTable from "./AddTable";
 import ModifyTable from "./ModifyTable";
 import RemoveTable from "./RemoveTable";
 import Landing from "./Landing";
+import EDContainer from "./components/EDContainer";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
         <Route path="/view-reservation" element={<ViewReservation />} />
         <Route path="/create-reservation" element={<CreateReservation />} />
         <Route path="/modify-reservation" element={<ModifyReservation />} />
-        <Route path="/employee-home" element={<EmployeeHome />} />
+        <Route path="/employee-home" element={<EDContainer />} />
         <Route path="/modify-floorplan" element={<ModifyFloorplan />} />
         <Route path="/view-seating-chart" element={<ViewSeatingChart />} />
         <Route path="/view-queue" element={<ViewQueue />} />
