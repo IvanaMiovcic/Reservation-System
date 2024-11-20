@@ -6,7 +6,7 @@ export default function Header() {
   //function to determine if a user is logged in and currently has a valid sesssion
   const isLoggedIn = () => {
     //logic to determine if user has a valid session goes here
-    return false;
+    return true;
   };
 
   return (
@@ -16,11 +16,15 @@ export default function Header() {
         <div>SmartQ</div>
       </div>
       <div className="font-poppins">
-        <Link>
-          <Button variant="secondary">
-            {isLoggedIn() ? "Dashboard" : "Log In"}
-          </Button>
-        </Link>
+        {isLoggedIn() ? (
+          <Link to="/employee-home">
+            <Button variant="secondary">Dashboard</Button>
+          </Link>
+        ) : (
+          <Link>
+            <Button variant="secondary">Log In</Button>
+          </Link>
+        )}
       </div>
     </div>
   );
