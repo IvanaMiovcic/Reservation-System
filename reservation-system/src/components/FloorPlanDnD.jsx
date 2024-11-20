@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { Plus } from "lucide-react";
 import { DndContext } from "@dnd-kit/core";
 import { Droppable } from "./Droppable";
 import { Draggable } from "./Draggable";
 import { TwoSeaterAvaiHori } from "./TwoSeater";
 import { FourSeaterAvai } from "./FourSeater";
+import { SixSeaterAvaiHori } from "./SixSeater";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 import { v4 as uuidv4 } from "uuid";
@@ -11,8 +13,9 @@ import { Button } from "./ui/button";
 
 export default function FloorPlanDnD() {
   function twoSeaterDrag() {
+    const uuid = uuidv4();
     return (
-      <Draggable id={`2+${uuidv4()}`}>
+      <Draggable id={`2+${uuid}`}>
         <TwoSeaterAvaiHori />
       </Draggable>
     );
@@ -22,6 +25,15 @@ export default function FloorPlanDnD() {
     return (
       <Draggable id={`4+${uuid}`}>
         <FourSeaterAvai />
+      </Draggable>
+    );
+  }
+
+  function sixSeaterDrag() {
+    const uuid = uuidv4();
+    return (
+      <Draggable id={`6+${uuid}`}>
+        <SixSeaterAvaiHori />
       </Draggable>
     );
   }
@@ -53,8 +65,10 @@ export default function FloorPlanDnD() {
 
       case "4":
         return <FourSeaterAvai />;
+      case "6":
+        return <SixSeaterAvaiHori />;
       default:
-        return "Drop here";
+        return <Plus className="text-zinc-500" />;
     }
   };
 
@@ -66,7 +80,9 @@ export default function FloorPlanDnD() {
       return (
         <Droppable key={cellId} id={cellId}>
           <div className="col-span-1 row-span-1 border text-white w-full h-full">
-            {setPlacedComponents(() => "")}
+            {setPlacedComponents(() => (
+              <Plus className="text-zinc-500" />
+            ))}
           </div>
         </Droppable>
       );
@@ -79,28 +95,36 @@ export default function FloorPlanDnD() {
 
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
-      <div className="flex flex-row h-1/2 border p-5 rounded-md space-x-4">
-        <div className="grid grid-rows-3 bg-primary-foreground grid-cols-6 w-full bg-black border">
-          {Array.from({ length: totalCells }).map((_, index) => {
-            const row = Math.floor(index / columns);
-            const col = index % columns;
-            const cellId = `cell-${row}-${col}`;
-            return (
-              <Droppable key={cellId} id={cellId}>
-                <div className="col-span-1 row-span-1 border text-white w-full h-full">
-                  {placedComponents[cellId]
-                    ? renderComponent(placedComponents[cellId])
-                    : ""}
-                </div>
-              </Droppable>
-            );
-          })}
+      <div className="flex flex-col rounded-md space-y-4 p-5 h-1/2 border">
+        <div className="text-white text-2xl">
+          Create Floor Plan: Work in Progress; Will be in modify-floor-plan page
         </div>
-        <div className="flex flex-col items-center gap-4">
-          <div className="">{twoSeaterDrag()}</div>
-          <div className="">{fourSeaterDrag()}</div>
-          <div onClick={() => clearFloor()}>
-            <Button>Reset Floor</Button>
+        <div className="flex flex-row flex-grow space-x-4">
+          <div className="grid grid-rows-3 grid-cols-6 w-full">
+            {Array.from({ length: totalCells }).map((_, index) => {
+              const row = Math.floor(index / columns);
+              const col = index % columns;
+              const cellId = `cell-${row}-${col}`;
+              return (
+                <Droppable key={cellId} id={cellId}>
+                  <div className="flex justify-center items-center col-span-1 row-span-1 text-white w-full h-full border-[0.5px] bg-background">
+                    {placedComponents[cellId] ? (
+                      renderComponent(placedComponents[cellId])
+                    ) : (
+                      <Plus className="text-zinc-500" />
+                    )}
+                  </div>
+                </Droppable>
+              );
+            })}
+          </div>
+          <div className="flex flex-col items-center justify-between">
+            <div className="">{twoSeaterDrag()}</div>
+            <div className="">{sixSeaterDrag()}</div>
+            <div className="">{fourSeaterDrag()}</div>
+            <div onClick={() => clearFloor()}>
+              <Button>Reset Floor</Button>
+            </div>
           </div>
         </div>
       </div>

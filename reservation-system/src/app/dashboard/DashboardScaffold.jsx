@@ -41,7 +41,7 @@ export default function DashboardScaffold() {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex w-full justify-between">
             <text>Restaurant Name</text>
-            <Badge>{`${current_date}`}</Badge>
+            <Badge variant="secondary">{"Clock Placeholder"}</Badge>
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
