@@ -49,7 +49,7 @@ export default function LIFormScaffold() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="text-white text-start text-3xl sm:text-4xl">
-              Log In
+              Login
             </div>
             <FormField
               control={form.control}
