@@ -9,6 +9,22 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Ellipsis } from "lucide-react";
 
 const reservations = [
   {
@@ -223,7 +239,7 @@ export default function ReserveDataTable() {
                     <TableHead className="w-[15%]">Table</TableHead>
                     <TableHead className="w-[15%]">Time</TableHead>
                     <TableHead className="">Priority</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -238,6 +254,37 @@ export default function ReserveDataTable() {
                         ) : (
                           <Badge variant="secondary">Standard</Badge>
                         )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost">
+                              <Ellipsis />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>
+                              Options for {reservation.name}
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => console.log(reservation.id)}
+                            >
+                              Notify Customer
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => console.log(reservation.id)}
+                            >
+                              View Reservation Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => console.log(reservation.id)}
+                            >
+                              Delete Reservation
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
