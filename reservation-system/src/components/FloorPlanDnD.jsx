@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
 import { DndContext } from "@dnd-kit/core";
 import { Droppable } from "./Droppable";
 import { Draggable } from "./Draggable";
@@ -96,7 +95,6 @@ export default function FloorPlanDnD() {
         return <SixSeaterAvaiVerti />;
 
       default:
-        return <Plus className="text-zinc-500" />;
     }
   };
 
@@ -108,10 +106,18 @@ export default function FloorPlanDnD() {
       const row = Math.floor(index / columns);
       const col = index % columns;
       const cellId = `cell-${row}-${col}`;
+      const rowCalc = row * 6;
+      const colCalc = col + 1;
+      let tableNo = rowCalc + colCalc;
+      if (tableNo < 10) {
+        tableNo = `0${tableNo}`;
+      } else {
+        tableNo = `${tableNo}`;
+      }
       return (
         <Droppable key={cellId} id={cellId}>
           <div className="col-span-1 row-span-1 border text-white w-full h-full">
-            <Plus className="text-zinc-500" />
+            <div className="text-zinc-600 text-xs font-mono">{tableNo}</div>
           </div>
         </Droppable>
       );
@@ -128,18 +134,28 @@ export default function FloorPlanDnD() {
         <div className="text-white text-xl">Create Floor Plan</div>
         <div className="flex flex-row flex-grow space-x-4">
           <div className="flex flex-row w-[80%]">
-            <div className="grid grid-rows-3 grid-cols-6 border w-full">
+            <div className="grid grid-flow-row grid-cols-6 grid-rows-3 border w-full">
               {Array.from({ length: totalCells }).map((_, index) => {
                 const row = Math.floor(index / columns);
                 const col = index % columns;
                 const cellId = `cell-${row}-${col}`;
+                const rowCalc = row * 6;
+                const colCalc = col + 1;
+                let tableNo = rowCalc + colCalc;
+                if (tableNo < 10) {
+                  tableNo = `0${tableNo}`;
+                } else {
+                  tableNo = `${tableNo}`;
+                }
                 return (
                   <Droppable key={cellId} id={cellId}>
                     <div className="flex justify-center items-center col-span-1 row-span-1 text-white w-full h-full bg-background">
                       {placedComponents[cellId] ? (
                         renderComponent(placedComponents[cellId])
                       ) : (
-                        <Plus className="text-zinc-500" />
+                        <div className="text-zinc-600 text-xs font-mono">
+                          {tableNo}
+                        </div>
                       )}
                     </div>
                   </Droppable>

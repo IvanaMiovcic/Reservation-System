@@ -8,6 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Time from "@/components/Time";
 import FloorPlanDnD from "@/components/FloorPlanDnD";
+import ReserveDataTable from "@/components/ReserveDataTable";
 
 function get_date() {
   const months = [
@@ -41,12 +42,13 @@ export default function DashboardScaffold() {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex w-full justify-between">
             <text>Restaurant Name</text>
-            <Badge variant="secondary">
+            <Badge variant="outline">
               <Time />
             </Badge>
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
+          <ReserveDataTable />
           <FloorPlanDnD />
         </div>
       </SidebarInset>
