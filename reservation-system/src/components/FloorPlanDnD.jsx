@@ -148,15 +148,23 @@ export default function FloorPlanDnD() {
             </div>
           </div>
           <div className="flex flex-col items-center justify-between w-[20%]">
-            <div className="flex flex-row items-center justify-around w-[80%]">
-              <div>{twoSeaterDragHori()}</div>
-              <div>{twoSeaterDragVerti()}</div>
+            <div className="inline-grid grid-cols-2 gap-4">
+              <div className="flex justify-center align-middle">
+                {twoSeaterDragHori()}
+              </div>
+              <div className="flex justify-center align-middle">
+                {twoSeaterDragVerti()}
+              </div>
+              <div className="flex justify-center align-middle">
+                {sixSeaterDragHori()}
+              </div>
+              <div className="flex justify-center align-middle">
+                {sixSeaterDragVerti()}
+              </div>
+              <div className="flex justify-center align-middle">
+                {fourSeaterDrag()}
+              </div>
             </div>
-            <div className="flex flex-row items-center justify-around w-[80%]">
-              <div>{sixSeaterDragHori()}</div>
-              <div>{sixSeaterDragVerti()}</div>
-            </div>
-            <div>{fourSeaterDrag()}</div>
             <div onClick={() => clearFloor()}>
               <Button>Reset Floor</Button>
             </div>
