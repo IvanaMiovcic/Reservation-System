@@ -131,8 +131,8 @@ export default function FloorPlanDnD() {
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
       <div className="flex flex-col rounded-md gap-3 p-5 h-1/2 border">
-        <div className="text-white text-xl">Create Floor Plan</div>
-        <div className="flex flex-row flex-grow space-x-4">
+        <div className="text-white text-xl h-[8%]">Create Floor Plan</div>
+        <div className="flex flex-row h-[92%] space-x-4">
           <div className="flex flex-row w-[80%]">
             <div className="grid grid-flow-row grid-cols-6 grid-rows-3 border w-full">
               {Array.from({ length: totalCells }).map((_, index) => {

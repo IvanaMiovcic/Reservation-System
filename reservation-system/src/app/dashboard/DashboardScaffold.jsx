@@ -36,7 +36,7 @@ export default function DashboardScaffold() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="h-screen">
         <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 text-white">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -47,7 +47,7 @@ export default function DashboardScaffold() {
             </Badge>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-col h-[93.3%] gap-4 p-4">
           <ReserveDataTable />
           <FloorPlanDnD />
         </div>
