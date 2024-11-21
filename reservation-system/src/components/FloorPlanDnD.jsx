@@ -72,6 +72,7 @@ export default function FloorPlanDnD() {
         [over.id]: {
           type: getComponentType(active.id),
           id: active.id,
+          status: 0,
         },
       }));
     }
@@ -100,6 +101,9 @@ export default function FloorPlanDnD() {
   };
 
   function clearFloor() {
+    {
+      setPlacedComponents(() => ({}));
+    }
     return Array.from({ length: totalCells }).map((_, index) => {
       const row = Math.floor(index / columns);
       const col = index % columns;
@@ -107,9 +111,7 @@ export default function FloorPlanDnD() {
       return (
         <Droppable key={cellId} id={cellId}>
           <div className="col-span-1 row-span-1 border text-white w-full h-full">
-            {setPlacedComponents(() => (
-              <Plus className="text-zinc-500" />
-            ))}
+            <Plus className="text-zinc-500" />
           </div>
         </Droppable>
       );
@@ -122,20 +124,18 @@ export default function FloorPlanDnD() {
 
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
-      <div className="flex flex-col rounded-md gap-4 p-5 h-1/2 border">
-        <div className="text-white text-2xl">
-          Create Floor Plan: Work in Progress; Will be in modify-floor-plan page
-        </div>
+      <div className="flex flex-col rounded-md gap-3 p-5 h-1/2 border">
+        <div className="text-white text-xl">Create Floor Plan</div>
         <div className="flex flex-row flex-grow space-x-4">
           <div className="flex flex-row w-[80%]">
-            <div className="grid grid-rows-3 grid-cols-6 w-full">
+            <div className="grid grid-rows-3 grid-cols-6 border w-full">
               {Array.from({ length: totalCells }).map((_, index) => {
                 const row = Math.floor(index / columns);
                 const col = index % columns;
                 const cellId = `cell-${row}-${col}`;
                 return (
                   <Droppable key={cellId} id={cellId}>
-                    <div className="flex justify-center items-center col-span-1 row-span-1 text-white w-full h-full border-[0.5px] bg-background">
+                    <div className="flex justify-center items-center col-span-1 row-span-1 text-white w-full h-full bg-background">
                       {placedComponents[cellId] ? (
                         renderComponent(placedComponents[cellId])
                       ) : (
