@@ -6,6 +6,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
+import Time from "@/components/Time";
 import FloorPlanDnD from "@/components/FloorPlanDnD";
 
 function get_date() {
@@ -31,7 +32,6 @@ function get_date() {
 }
 
 export default function DashboardScaffold() {
-  const current_date = get_date();
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -41,7 +41,9 @@ export default function DashboardScaffold() {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex w-full justify-between">
             <text>Restaurant Name</text>
-            <Badge variant="secondary">{"Clock Placeholder"}</Badge>
+            <Badge variant="secondary">
+              <Time />
+            </Badge>
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
