@@ -42,7 +42,7 @@ export default function DashboardScaffold() {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex w-full justify-between">
             <text>Restaurant Name</text>
-            <Badge variant="secondary">
+            <Badge variant="outline">
               <Time />
             </Badge>
           </div>
