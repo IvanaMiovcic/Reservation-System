@@ -96,14 +96,10 @@ export default function Header() {
   const headerButton = buttonTypes[userStatus];
 
   return (
-    <div className="flex flex-row justify-between pt-10 sm:pt-6">
-      <div className="flex flex-row justify-center items-center gap-2 font-poppins text-white text-xl">
+    <div className="flex flex-row justify-between pt-10 sm:pt-6 font-poppins">
+      <div className="flex flex-row justify-center items-center gap-2 text-white text-xl">
         <Logo />
         <div>SmartQ</div>
-      </div>
-
-      <div className="font-poppins" onClick={() => signOut()}>
-        <Button variant="destructive">Sign Out</Button>
       </div>
 
       <div>{headerButton}</div>
