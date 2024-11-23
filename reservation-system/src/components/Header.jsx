@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -13,9 +14,48 @@ const supabase = createClient(
 export default function Header() {
   const [userStatus, setUserStatus] = useState("loading");
 
+  const buttonTypes = {
+    loading: (
+      <Button variant="secondary" disabled>
+        <Loader2 className="animate-spin" />
+      </Button>
+    ),
+    "logged-out": (
+      <Link to="log-in">
+        <Button variant="secondary">Log In</Button>
+      </Link>
+    ),
+    management: (
+      <div className="flex flex-row text-white space-x-2">
+        <Link to="employee-home">
+          <Button variant="secondary">Employee Dashboard</Button>
+        </Link>
+        <div onClick={() => signOut()}>
+          <Button variant="destructive">
+            <LogOut />
+          </Button>
+        </div>
+      </div>
+    ),
+    customer: (
+      <div className="flex flex-row text-white space-x-2">
+        <Link to="customer-home">
+          <Button variant="secondary">Customer Dashboard</Button>
+        </Link>
+        <div onClick={() => signOut()}>
+          <Button variant="destructive">
+            <LogOut />
+          </Button>
+        </div>
+      </div>
+    ),
+  };
+
   useEffect(() => {
     isLoggedIn();
-    const timer = setInterval(isLoggedIn(), 1000);
+
+    const timer = setInterval(isLoggedIn, 1 * 1000);
+
     return () => {
       clearInterval(timer);
     };
@@ -57,43 +97,18 @@ export default function Header() {
     }
   }
 
-  const buttonTypes = {
-    loading: (
-      <Button disabled>
-        <Loader2 />
-      </Button>
-    ),
-    "logged-out": (
-      <Link to="log-in">
-        <Button variant="secondary">Log In</Button>
-      </Link>
-    ),
-    management: (
-      <Link to="employee-home">
-        <Button variant="secondary">Employee Dashboard</Button>
-      </Link>
-    ),
-    customer: (
-      <Link to="customer-home">
-        <Button variant="secondary">Customer Dashboard</Button>
-      </Link>
-    ),
-  };
-
   async function signOut() {
     try {
       const { error } = await supabase.auth.signOut();
-      console.log("Logged out");
 
       if (error) {
         console.log(error);
       }
+      setUserStatus("logged-out");
     } catch (error) {
       console.log(error);
     }
   }
-
-  const headerButton = buttonTypes[userStatus];
 
   return (
     <div className="flex flex-row justify-between pt-10 sm:pt-6 font-poppins">
@@ -101,8 +116,7 @@ export default function Header() {
         <Logo />
         <div>SmartQ</div>
       </div>
-
-      <div>{headerButton}</div>
+      {buttonTypes[userStatus]}
     </div>
   );
 }
