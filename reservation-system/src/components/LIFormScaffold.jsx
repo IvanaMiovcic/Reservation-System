@@ -6,6 +6,12 @@ import { joiResolver } from "@hookform/resolvers/joi";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPA_URL,
+  import.meta.env.VITE_SUPA_ANON,
+);
 
 const schema = Joi.object({
   password: Joi.string()
@@ -32,8 +38,23 @@ const schema = Joi.object({
 });
 
 export default function LIFormScaffold() {
-  function onSubmit(data) {
-    console.log(data);
+  async function onSubmit(form_data) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: form_data.email,
+        password: form_data.password,
+      });
+
+      if (data.session) {
+        console.log("login success");
+      }
+
+      if (error) {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
   const form = useForm({
     resolver: joiResolver(schema),

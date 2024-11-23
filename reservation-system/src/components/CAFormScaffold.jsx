@@ -7,6 +7,12 @@ import { joiResolver } from "@hookform/resolvers/joi";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPA_URL,
+  import.meta.env.VITE_SUPA_ANON,
+);
 
 const schema = Joi.object({
   firstname: Joi.string().min(2).required().messages({
@@ -62,8 +68,26 @@ const schema = Joi.object({
 });
 
 export default function CAFormScaffold() {
-  function onSubmit(data) {
-    console.log(data);
+  async function onSubmit(form_data) {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: form_data.email,
+        password: form_data.password,
+        options: {
+          data: {
+            firstname: form_data.firstname,
+            lastname: form_data.lastname,
+            phone: form_data.phone,
+            account_type: form_data.account_type,
+          },
+        },
+      });
+      if (error) {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
   const form = useForm({
     resolver: joiResolver(schema),
