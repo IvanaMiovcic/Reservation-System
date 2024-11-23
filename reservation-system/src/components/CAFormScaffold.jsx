@@ -88,6 +88,31 @@ export default function CAFormScaffold() {
     } catch (error) {
       console.log(error);
     }
+
+    if (form_data.restaurant_name && !form_data.account_type === "Customer") {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        const { data: restaurant_id, error_restaurant } = await supabase
+          .from("restaurant")
+          .select("id");
+        if (error_restaurant) {
+          console.log(error_restaurant);
+          return;
+        }
+
+        const { data: dbData, error_worksAt } = await supabase
+          .from("works_at")
+          .insert([{ user_id: user.id, restaurant_id: restaurant_id }]);
+        if (error_worksAt) {
+          console.log(error_worksAt);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
   const form = useForm({
     resolver: joiResolver(schema),
