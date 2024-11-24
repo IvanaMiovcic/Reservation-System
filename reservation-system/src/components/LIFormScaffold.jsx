@@ -7,6 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -38,6 +39,8 @@ const schema = Joi.object({
 });
 
 export default function LIFormScaffold() {
+  const navigate = useNavigate();
+
   async function onSubmit(form_data) {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -52,10 +55,25 @@ export default function LIFormScaffold() {
       if (error) {
         console.log(error);
       }
+
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user.user_metadata.account_type === "Customer") {
+          navigate("/customer-home");
+        } else {
+          navigate("/employee-home");
+        }
+      } catch (error) {
+        console.log(error);
+      }
     } catch (error) {
       console.log(error);
     }
   }
+
   const form = useForm({
     resolver: joiResolver(schema),
     defaultValues: {
