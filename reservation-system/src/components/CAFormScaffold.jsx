@@ -1,17 +1,11 @@
 import Joi from "joi";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { joiResolver } from "@hookform/resolvers/joi";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  FormDescription,
-} from "./ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -106,6 +100,8 @@ const schema = Joi.object({
 });
 
 export default function CAFormScaffold() {
+  const navigate = useNavigate();
+
   async function onSubmit(form_data) {
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -123,30 +119,37 @@ export default function CAFormScaffold() {
       if (error) {
         console.log(error);
       }
+
+      if (form_data.restaurant_id) {
+        try {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          const { data: dbData, error_worksAt } = await supabase
+            .from("works_at")
+            .insert([
+              { user_id: user.id, restaurant_id: form_data.restaurant_id },
+            ]);
+
+          if (error_worksAt) {
+            console.log(error_worksAt);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
     } catch (error) {
       console.log(error);
     }
 
-    if (form_data.restaurant_id && !form_data.account_type === "Customer") {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        const { data: dbData, error_worksAt } = await supabase
-          .from("works_at")
-          .insert([
-            { user_id: user.id, restaurant_id: form_data.restaurant_id },
-          ]);
-
-        if (error_worksAt) {
-          console.log(error_worksAt);
-        }
-      } catch (error) {
-        console.log(error);
-      }
+    if (form_data.account_type === "Customer") {
+      navigate("/customer-home");
+    } else {
+      navigate("/employee-home");
     }
   }
+
   const form = useForm({
     resolver: joiResolver(schema),
     defaultValues: {
