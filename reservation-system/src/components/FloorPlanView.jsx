@@ -15,7 +15,7 @@ const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
 );
 
-export default function FloorPlanDnD() {
+export default function FloorPlanView() {
   const [placedComponents, setPlacedComponents] = useState({});
 
   function twoSeaterDragHori() {
@@ -110,7 +110,7 @@ export default function FloorPlanDnD() {
     return Array.from({ length: totalCells }).map((_, index) => {
       const row = Math.floor(index / columns);
       const col = index % columns;
-      const cellId = `cell-${row}-${col}`;
+      const cellId = `${row}-${col}`;
       const rowCalc = row * 6;
       const colCalc = col + 1;
       let tableNo = rowCalc + colCalc;

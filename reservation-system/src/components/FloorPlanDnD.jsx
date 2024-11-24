@@ -211,7 +211,7 @@ export default function FloorPlanDnD() {
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
       <div className="flex flex-col rounded-md gap-4 p-5 h-1/2 border">
         <div className="text-white flex h-[8%]">
-          <Dialog on>
+          <Dialog>
             <DialogTrigger asChild>
               <Button variant="link" className="text-xl">
                 {floorName}
