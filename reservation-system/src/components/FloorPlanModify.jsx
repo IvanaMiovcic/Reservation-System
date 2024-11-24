@@ -27,8 +27,7 @@ const supabase = createClient(
 );
 
 export default function FloorPlanDnD() {
-  function twoSeaterDragHori() {
-    const uuid = uuidv4();
+  function twoSeaterPopHori() {
     return (
       <Draggable id={`1+${uuid}`}>
         <TwoSeaterAvaiHori />
@@ -36,8 +35,7 @@ export default function FloorPlanDnD() {
     );
   }
 
-  function twoSeaterDragVerti() {
-    const uuid = uuidv4();
+  function twoSeaterPopVerti() {
     return (
       <Draggable id={`2+${uuid}`}>
         <TwoSeaterAvaiVerti />
@@ -45,8 +43,7 @@ export default function FloorPlanDnD() {
     );
   }
 
-  function fourSeaterDrag() {
-    const uuid = uuidv4();
+  function fourSeaterPop() {
     return (
       <Draggable id={`3+${uuid}`}>
         <FourSeaterAvai />
@@ -54,8 +51,7 @@ export default function FloorPlanDnD() {
     );
   }
 
-  function sixSeaterDragHori() {
-    const uuid = uuidv4();
+  function sixSeaterPopHori() {
     return (
       <Draggable id={`4+${uuid}`}>
         <SixSeaterAvaiHori />
@@ -63,8 +59,7 @@ export default function FloorPlanDnD() {
     );
   }
 
-  function sixSeaterDragVerti() {
-    const uuid = uuidv4();
+  function sixSeaterPopVerti() {
     return (
       <Draggable id={`5+${uuid}`}>
         <SixSeaterAvaiVerti />
@@ -75,7 +70,6 @@ export default function FloorPlanDnD() {
   const [configuration, setConfiguration] = useState({});
   const [floorName, setFloorName] = useState("New Floorplan");
   const [textField, setTextField] = useState(floorName);
-  const [tables, setTables] = useState({});
 
   function getComponentType(id) {
     return id.split("+")[0] || null;
@@ -84,29 +78,12 @@ export default function FloorPlanDnD() {
   function handleDragEnd(event) {
     const { over, active } = event;
 
-    let table_size;
-    if (getComponentType(active.id) > 3) {
-      table_size = 6;
-    } else if (getComponentType(active.id) < 3) {
-      table_size = 2;
-    } else {
-      table_size = 4;
-    }
-
     if (over) {
       setConfiguration((prev) => ({
         ...prev,
         [over.id]: {
           table_id: active.id,
           table_type: getComponentType(active.id),
-        },
-      }));
-
-      setTables((prev) => ({
-        ...prev,
-        [over.id]: {
-          table_id: active.id,
-          size: table_size,
         },
       }));
     }
@@ -159,18 +136,6 @@ export default function FloorPlanDnD() {
       if (error) {
         console.log(error);
       }
-
-      try {
-        const { dbData2, error } = await supabase
-          .from("table")
-          .insert(Object.values(tables));
-
-        if (error) {
-          console.log(error);
-        }
-      } catch (error) {
-        console.log(error);
-      }
     } catch (error) {
       console.log(error);
     }
@@ -179,7 +144,6 @@ export default function FloorPlanDnD() {
   function clearFloor() {
     {
       setConfiguration(() => ({}));
-      setTables(() => ({}));
     }
     return Array.from({ length: totalCells }).map((_, index) => {
       const row = Math.floor(index / columns);
