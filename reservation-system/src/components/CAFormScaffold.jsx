@@ -1,18 +1,56 @@
 import Joi from "joi";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { joiResolver } from "@hookform/resolvers/joi";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+  FormDescription,
+} from "./ui/form";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { createClient } from "@supabase/supabase-js";
+import { ChevronsUpDown, Check } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
   import.meta.env.VITE_SUPA_ANON,
 );
+
+async function getRestaurants() {
+  try {
+    let { data, error } = await supabase.from("restaurant").select("*");
+
+    if (error) {
+      console.log(error);
+    } else {
+      return data;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const restaurants = await getRestaurants();
 
 const schema = Joi.object({
   firstname: Joi.string().min(2).required().messages({
@@ -56,10 +94,10 @@ const schema = Joi.object({
   account_type: Joi.string()
     .valid("Customer", "Employee", "Manager")
     .required(),
-  restaurant_name: Joi.string()
+  restaurant_id: Joi.string()
     .required()
     .messages({
-      "string.empty": "Restaurant Name is Required",
+      "string.empty": "Please choose the restaurant you work at.",
     })
     .when("account_type", {
       is: "Customer",
@@ -89,23 +127,18 @@ export default function CAFormScaffold() {
       console.log(error);
     }
 
-    if (form_data.restaurant_name && !form_data.account_type === "Customer") {
+    if (form_data.restaurant_id && !form_data.account_type === "Customer") {
       try {
         const {
           data: { user },
         } = await supabase.auth.getUser();
 
-        const { data: restaurant_id, error_restaurant } = await supabase
-          .from("restaurant")
-          .select("id");
-        if (error_restaurant) {
-          console.log(error_restaurant);
-          return;
-        }
-
         const { data: dbData, error_worksAt } = await supabase
           .from("works_at")
-          .insert([{ user_id: user.id, restaurant_id: restaurant_id }]);
+          .insert([
+            { user_id: user.id, restaurant_id: form_data.restaurant_id },
+          ]);
+
         if (error_worksAt) {
           console.log(error_worksAt);
         }
@@ -124,7 +157,7 @@ export default function CAFormScaffold() {
       email: "",
       phone: "",
       account_type: "Customer",
-      restaurant_name: "",
+      restaurant_id: "",
     },
   });
 
@@ -144,7 +177,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
-                        className="border-zinc-400 focus:border-white"
+                        className="border-zinc-600 focus:border-white"
                         placeholder="First Name"
                         {...field}
                         {...form.register("firstname")}
@@ -161,7 +194,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
-                        className="border-zinc-400 focus:border-white"
+                        className="border-zinc-600 focus:border-white"
                         placeholder="Last Name"
                         {...field}
                         {...form.register("lastname")}
@@ -179,7 +212,7 @@ export default function CAFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400 focus:border-white"
+                      className="border-zinc-600 focus:border-white"
                       placeholder="Email"
                       {...field}
                       {...form.register("email")}
@@ -196,7 +229,7 @@ export default function CAFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400 focus:border-white"
+                      className="border-zinc-600 focus:border-white"
                       placeholder="Phone"
                       {...field}
                       {...form.register("phone")}
@@ -214,7 +247,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
-                        className="border-zinc-400 focus:border-white"
+                        className="border-zinc-600 focus:border-white"
                         placeholder="Password"
                         type="password"
                         {...field}
@@ -232,7 +265,7 @@ export default function CAFormScaffold() {
                   <FormItem className="w-1/2">
                     <FormControl className="text-xs sm:text-sm">
                       <Input
-                        className="border-zinc-400 focus:border-white"
+                        className="border-zinc-600 focus:border-white"
                         type="password"
                         placeholder="Repeat Password"
                         {...field}
@@ -248,7 +281,7 @@ export default function CAFormScaffold() {
               control={form.control}
               name="account_type"
               render={({ field }) => (
-                <FormItem className="border-zinc-400 border rounded-md">
+                <FormItem className="border-zinc-600 border rounded-md">
                   <FormControl>
                     <Tabs
                       defaultValue="Customer"
@@ -276,20 +309,67 @@ export default function CAFormScaffold() {
                           <FormControl>
                             <FormField
                               control={form.control}
-                              name="restaurant_name"
+                              name="restaurant_id"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormControl className="text-xs sm:text-sm">
-                                    <div className="flex flex-col items-center space-y-2 py-2">
-                                      <Input
-                                        className="w-[98%] border-zinc-600 focus:border-white"
-                                        placeholder="Restaurant Name"
-                                        {...field}
-                                        {...form.register("restaurant_name")}
-                                      />
-                                      <FormMessage className="self-start pl-2" />
-                                    </div>
-                                  </FormControl>
+                                  <Popover>
+                                    <PopoverTrigger asChild className="dark">
+                                      <FormControl className="text-xs sm:text-sm flex w-full">
+                                        <Button
+                                          variant="outline"
+                                          role="combobox"
+                                          className={cn(
+                                            "justify-between w-[98%] mx-auto mb-2",
+                                            !field.value &&
+                                              "text-muted-foreground",
+                                          )}
+                                        >
+                                          {field.value
+                                            ? restaurants.find(
+                                                (restaurant) =>
+                                                  restaurant.id === field.value,
+                                              )?.name
+                                            : "Pick a Restaurant"}
+                                          <ChevronsUpDown className="opacity-50" />
+                                        </Button>
+                                      </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="dark">
+                                      <Command>
+                                        <CommandInput placeholder="Search for a Restaurant" />
+                                        <CommandList>
+                                          <CommandEmpty>
+                                            No restaurants found.
+                                          </CommandEmpty>
+                                          <CommandGroup>
+                                            {restaurants.map((restaurant) => (
+                                              <CommandItem
+                                                value={restaurant.name}
+                                                key={restaurant.id}
+                                                onSelect={() => {
+                                                  form.setValue(
+                                                    "restaurant_id",
+                                                    restaurant.id,
+                                                  );
+                                                }}
+                                              >
+                                                {restaurant.name}
+                                                <Check
+                                                  className={cn(
+                                                    "ml-auto",
+                                                    restaurant.id ===
+                                                      field.value
+                                                      ? "opacity-100"
+                                                      : "opacity-0",
+                                                  )}
+                                                />
+                                              </CommandItem>
+                                            ))}
+                                          </CommandGroup>
+                                        </CommandList>
+                                      </Command>
+                                    </PopoverContent>
+                                  </Popover>
                                 </FormItem>
                               )}
                             />
@@ -301,20 +381,67 @@ export default function CAFormScaffold() {
                           <FormControl>
                             <FormField
                               control={form.control}
-                              name="restaurant_name"
+                              name="restaurant_id"
                               render={({ field }) => (
-                                <FormItem className="">
-                                  <FormControl className="text-xs sm:text-sm">
-                                    <div className="flex flex-col items-center space-y-2 py-2">
-                                      <Input
-                                        className="w-[98%] border-zinc-600 focus:border-white"
-                                        placeholder="Restaurant Name"
-                                        {...field}
-                                        {...form.register("restaurant_name")}
-                                      />
-                                      <FormMessage className="self-start pl-2" />
-                                    </div>
-                                  </FormControl>
+                                <FormItem>
+                                  <Popover>
+                                    <PopoverTrigger asChild className="dark">
+                                      <FormControl className="text-xs sm:text-sm flex w-full">
+                                        <Button
+                                          variant="outline"
+                                          role="combobox"
+                                          className={cn(
+                                            "justify-between w-[98%] mx-auto mb-2",
+                                            !field.value &&
+                                              "text-muted-foreground",
+                                          )}
+                                        >
+                                          {field.value
+                                            ? restaurants.find(
+                                                (restaurant) =>
+                                                  restaurant.id === field.value,
+                                              )?.name
+                                            : "Pick a Restaurant"}
+                                          <ChevronsUpDown className="opacity-50" />
+                                        </Button>
+                                      </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="dark">
+                                      <Command>
+                                        <CommandInput placeholder="Search for a Restaurant" />
+                                        <CommandList>
+                                          <CommandEmpty>
+                                            No restaurants found.
+                                          </CommandEmpty>
+                                          <CommandGroup>
+                                            {restaurants.map((restaurant) => (
+                                              <CommandItem
+                                                value={restaurant.name}
+                                                key={restaurant.id}
+                                                onSelect={() => {
+                                                  form.setValue(
+                                                    "restaurant_id",
+                                                    restaurant.id,
+                                                  );
+                                                }}
+                                              >
+                                                {restaurant.name}
+                                                <Check
+                                                  className={cn(
+                                                    "ml-auto",
+                                                    restaurant.id ===
+                                                      field.value
+                                                      ? "opacity-100"
+                                                      : "opacity-0",
+                                                  )}
+                                                />
+                                              </CommandItem>
+                                            ))}
+                                          </CommandGroup>
+                                        </CommandList>
+                                      </Command>
+                                    </PopoverContent>
+                                  </Popover>
                                 </FormItem>
                               )}
                             />
