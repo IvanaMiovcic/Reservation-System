@@ -1,4 +1,4 @@
-import DashboardScaffold from "@/app/dashboard/EDashboardScaffold";
+import DashboardScaffold from "@/app/dashboard/CDashboardScaffold";
 export default function EDContainer() {
   return (
     <div className="dark font-poppins flex">

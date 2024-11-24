@@ -1,7 +1,5 @@
-import { ChevronsUpDown, LogOut } from "lucide-react";
-
+import { ChevronsUpDown, LogOut, House } from "lucide-react";
 import { Badge } from "./ui/badge";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,10 +15,30 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPA_URL,
+  import.meta.env.VITE_SUPA_ANON,
+);
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
+
+  async function handleLogOut() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.log(error);
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -60,10 +78,16 @@ export function NavUser({ user }) {
             <DropdownMenuSeparator />
             <Link to="/">
               <DropdownMenuItem>
-                <LogOut />
-                Log out
+                <House />
+                Return to Landing page
               </DropdownMenuItem>
             </Link>
+            <div onClick={() => handleLogOut()}>
+              <DropdownMenuItem>
+                <LogOut />
+                Log Out
+              </DropdownMenuItem>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

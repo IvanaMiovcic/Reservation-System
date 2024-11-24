@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/cd-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -41,7 +41,7 @@ export default function DashboardScaffold() {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex w-full justify-between">
-            <text>Restaurant Name</text>
+            <div>Restaurant Name</div>
             <Badge variant="outline">
               <Time />
             </Badge>
