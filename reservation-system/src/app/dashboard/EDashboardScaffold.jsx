@@ -11,6 +11,14 @@ import FloorPlanDnD from "@/components/FloorPlanDnD";
 import ReserveDataTable from "@/components/ReserveDataTable";
 import FloorPlanModify from "@/components/FloorPlanModify";
 import FloorPlanView from "@/components/FloorPlanView";
+import { useNavigate } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
+import { useEffect } from "react";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPA_URL,
+  import.meta.env.VITE_SUPA_ANON,
+);
 
 function get_date() {
   const months = [
@@ -34,7 +42,56 @@ function get_date() {
   return `${months[month_index]} ${date}, ${year}`;
 }
 
+let restaurant_name;
+
+async function getRestaurantName() {
+  try {
+    const { data: user_data } = await supabase.auth.getUser();
+    try {
+      const { data: restaurant_data } = await supabase
+        .from("works_at")
+        .select("restaurant_id")
+        .eq("user_id", user_data.user.id);
+      try {
+        const { data } = await supabase
+          .from("restaurant")
+          .select("name")
+          .eq("id", restaurant_data[0].restaurant_id);
+        restaurant_name = data[0].name;
+      } catch (error) {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export default function DashboardScaffold() {
+  const navigate = useNavigate();
+
+  async function checkUser() {
+    try {
+      const { data: user_data, error } = await supabase.auth.getUser();
+      if (error) {
+        navigate("/log-in");
+      }
+      if (user_data.user.user_metadata.account_type === "Customer") {
+        navigate("/customer-home");
+      }
+    } catch (error) {
+      console.log(error);
+      navigate("/");
+    }
+  }
+
+  useEffect(() => {
+    checkUser();
+    getRestaurantName();
+  }, []);
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -43,7 +100,7 @@ export default function DashboardScaffold() {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex w-full justify-between">
-            <div>Restaurant Name</div>
+            {restaurant_name ? `${restaurant_name}` : "Restaurant Name"}
             <Badge variant="outline">
               <Time />
             </Badge>

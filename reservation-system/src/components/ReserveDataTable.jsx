@@ -25,9 +25,9 @@ export default function ReserveDataTable() {
   const [reservations, setReservations] = useState(null);
 
   return (
-    <div className="h-1/2">
+    <div className="h-[100%]">
       <div className="flex flex-col rounded-md gap-3 p-5 h-full border">
-        <div className="flex flex-row space-x-3 h-[8%]">
+        <div className="flex flex-row space-x-3">
           <div className="text-white text-xl">Reservations</div>
           <Badge className="">{reservations ? reservations.length : 0}</Badge>
         </div>

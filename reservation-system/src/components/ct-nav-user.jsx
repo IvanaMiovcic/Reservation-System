@@ -70,15 +70,9 @@ export function NavUser({ user }) {
                   <span className="truncate font-semibold">{name}</span>
                   <span className="truncate text-xs">{user.email}</span>
                   <span className="truncate">
-                    {user.user_metadata.account_type === "Manager" ? (
-                      <Badge className="text-xs mt-1" variant="destructive">
-                        Manager
-                      </Badge>
-                    ) : (
-                      <Badge className="text-xs mt-1" variant="Secondary">
-                        Employee
-                      </Badge>
-                    )}
+                    <Badge className="text-xs mt-1" variant="secondary">
+                      Customer
+                    </Badge>
                   </span>
                 </div>
               </div>
