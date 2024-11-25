@@ -1,7 +1,13 @@
 import React, { useState } from "react";
-import { TwoSeaterAvaiHori, TwoSeaterAvaiVerti } from "./TwoSeater";
-import { FourSeaterAvai } from "./FourSeater";
-import { SixSeaterAvaiHori, SixSeaterAvaiVerti } from "./SixSeater";
+import {
+  TwoSeaterViewHori,
+  TwoSeaterViewVerti,
+} from "./tableView/TwoSeaterView";
+import { FourSeaterView } from "./tableView/FourSeaterView";
+import {
+  SixSeaterViewHori,
+  SixSeaterViewVerti,
+} from "./tableView/SixSeaterView";
 import { createClient } from "@supabase/supabase-js";
 import { Badge } from "./ui/badge";
 
@@ -36,19 +42,19 @@ export default function FloorPlanView() {
   const renderComponent = (data) => {
     switch (data.table_type) {
       case "1":
-        return <TwoSeaterAvaiHori />;
+        return <TwoSeaterViewHori tableID={data.table_id} />;
 
       case "2":
-        return <TwoSeaterAvaiVerti />;
+        return <TwoSeaterViewVerti tableID={data.table_id} />;
 
       case "3":
-        return <FourSeaterAvai />;
+        return <FourSeaterView tableID={data.table_id} />;
 
       case "4":
-        return <SixSeaterAvaiHori />;
+        return <SixSeaterViewHori tableID={data.table_id} />;
 
       case "5":
-        return <SixSeaterAvaiVerti />;
+        return <SixSeaterViewVerti tableID={data.table_id} />;
 
       default:
     }
