@@ -8,8 +8,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Time from "@/components/Time";
 import FloorPlanDnD from "@/components/FloorPlanDnD";
-//import ReserveDataTable from "@/components/ReserveDataTable";
+import ReserveDataTable from "@/components/ReserveDataTable";
 import FloorPlanModify from "@/components/FloorPlanModify";
+import FloorPlanView from "@/components/FloorPlanView";
 
 function get_date() {
   const months = [
@@ -49,8 +50,8 @@ export default function DashboardScaffold() {
           </div>
         </header>
         <div className="flex flex-col h-[93.3%] gap-4 p-4">
-          <FloorPlanModify />
-          <FloorPlanDnD />
+          <ReserveDataTable />
+          <FloorPlanView />
         </div>
       </SidebarInset>
     </SidebarProvider>

@@ -34,7 +34,7 @@ export default function ReserveDataTable() {
         <div className="flex flex-col h-[92%]">
           {reservations === null ? (
             <div className="text-zinc-600 text-xs font-mono m-auto">
-              No reservations yet.
+              No reservations.
             </div>
           ) : (
             <ScrollArea>

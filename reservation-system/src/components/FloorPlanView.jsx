@@ -1,89 +1,40 @@
 import React, { useState } from "react";
-import { DndContext } from "@dnd-kit/core";
-import { Droppable } from "./Droppable";
-import { Draggable } from "./Draggable";
 import { TwoSeaterAvaiHori, TwoSeaterAvaiVerti } from "./TwoSeater";
 import { FourSeaterAvai } from "./FourSeater";
 import { SixSeaterAvaiHori, SixSeaterAvaiVerti } from "./SixSeater";
-import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { v4 as uuidv4 } from "uuid";
-import { Button } from "./ui/button";
 import { createClient } from "@supabase/supabase-js";
+import { Badge } from "./ui/badge";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
-  import.meta.env.VITE_SUPA_URL,
+  import.meta.env.VITE_SUPA_ANON,
 );
 
-export default function FloorPlanView() {
-  const [placedComponents, setPlacedComponents] = useState({});
+const floorplan_id = "7c93a5b8-735f-4399-a3cb-ccf6d73c8762";
 
-  function twoSeaterDragHori() {
-    const uuid = uuidv4();
-    return (
-      <Draggable id={`1+${uuid}`}>
-        <TwoSeaterAvaiHori />
-      </Draggable>
-    );
-  }
+async function getFloor(floorplan_id) {
+  try {
+    const { data, error } = await supabase
+      .from("floorplan")
+      .select("name, configuration")
+      .eq("floorplan_id", floorplan_id);
 
-  function twoSeaterDragVerti() {
-    const uuid = uuidv4();
-    return (
-      <Draggable id={`2+${uuid}`}>
-        <TwoSeaterAvaiVerti />
-      </Draggable>
-    );
-  }
-
-  function fourSeaterDrag() {
-    const uuid = uuidv4();
-    return (
-      <Draggable id={`3+${uuid}`}>
-        <FourSeaterAvai />
-      </Draggable>
-    );
-  }
-
-  function sixSeaterDragHori() {
-    const uuid = uuidv4();
-    return (
-      <Draggable id={`4+${uuid}`}>
-        <SixSeaterAvaiHori />
-      </Draggable>
-    );
-  }
-
-  function sixSeaterDragVerti() {
-    const uuid = uuidv4();
-    return (
-      <Draggable id={`5+${uuid}`}>
-        <SixSeaterAvaiVerti />
-      </Draggable>
-    );
-  }
-
-  function getComponentType(id) {
-    return id.split("+")[0] || null;
-  }
-
-  function handleDragEnd(event) {
-    const { over, active } = event;
-
-    if (over) {
-      setPlacedComponents((prev) => ({
-        ...prev,
-        [over.id]: {
-          type: getComponentType(active.id),
-          id: active.id,
-          status: 0,
-        },
-      }));
+    if (error) {
+      console.log(error);
     }
-  }
 
+    return data[0];
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
+const floorplan = await getFloor(floorplan_id);
+
+export default function FloorPlanView() {
   const renderComponent = (data) => {
-    switch (data.type) {
+    switch (data.table_type) {
       case "1":
         return <TwoSeaterAvaiHori />;
 
@@ -103,47 +54,35 @@ export default function FloorPlanView() {
     }
   };
 
-  function clearFloor() {
-    {
-      setPlacedComponents(() => ({}));
-    }
-    return Array.from({ length: totalCells }).map((_, index) => {
-      const row = Math.floor(index / columns);
-      const col = index % columns;
-      const cellId = `${row}-${col}`;
-      const rowCalc = row * 6;
-      const colCalc = col + 1;
-      let tableNo = rowCalc + colCalc;
-      if (tableNo < 10) {
-        tableNo = `0${tableNo}`;
-      } else {
-        tableNo = `${tableNo}`;
-      }
-      return (
-        <Droppable key={cellId} id={cellId}>
-          <div className="col-span-1 row-span-1 border text-white w-full h-full">
-            <div className="text-zinc-600 text-xs font-mono">{tableNo}</div>
-          </div>
-        </Droppable>
-      );
-    });
-  }
-
   const rows = 3;
   const columns = 6;
   const totalCells = rows * columns;
 
   return (
-    <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
-      <div className="flex flex-col rounded-md gap-3 p-5 h-1/2 border">
-        <div className="text-white text-xl h-[8%]">Create Floor Plan</div>
-        <div className="flex flex-row h-[92%] space-x-4">
-          <div className="flex flex-row w-[80%]">
-            <div className="grid grid-flow-row grid-cols-6 grid-rows-3 border w-full">
+    <div className="flex flex-col rounded-md gap-4 p-5 h-1/2 border">
+      {floorplan ? (
+        <div className="flex flex-row text-xl gap-3 h-[8%]">
+          <div className="text-white">Floor Status</div>
+          <Badge>{floorplan.name}</Badge>
+        </div>
+      ) : (
+        <div className="flex flex-row text-xl h-[8%]">
+          <div className="text-white">Floor Status</div>
+        </div>
+      )}
+
+      <div className="flex flex-row h-[92%] space-x-4">
+        <div className="flex flex-row w-full">
+          {floorplan === null ? (
+            <div className="text-zinc-600 text-xs font-mono m-auto">
+              No floorplans.
+            </div>
+          ) : (
+            <div className="grid grid-flow-row grid-cols-6 grid-rows-3 w-full">
               {Array.from({ length: totalCells }).map((_, index) => {
                 const row = Math.floor(index / columns);
                 const col = index % columns;
-                const cellId = `cell-${row}-${col}`;
+                const cellId = `${row}-${col}`;
                 const rowCalc = row * 6;
                 const colCalc = col + 1;
                 let tableNo = rowCalc + colCalc;
@@ -153,45 +92,21 @@ export default function FloorPlanView() {
                   tableNo = `${tableNo}`;
                 }
                 return (
-                  <Droppable key={cellId} id={cellId}>
+                  <div key={cellId} id={cellId}>
                     <div className="flex justify-center items-center col-span-1 row-span-1 text-white w-full h-full bg-background">
-                      {placedComponents[cellId] ? (
-                        renderComponent(placedComponents[cellId])
+                      {floorplan?.configuration[cellId] ? (
+                        renderComponent(floorplan.configuration[cellId])
                       ) : (
-                        <div className="text-zinc-600 text-xs font-mono">
-                          {tableNo}
-                        </div>
+                        <div className="text-zinc-600 text-xs font-mono"></div>
                       )}
                     </div>
-                  </Droppable>
+                  </div>
                 );
               })}
             </div>
-          </div>
-          <div className="flex flex-col items-center justify-between w-[20%]">
-            <div className="inline-grid grid-cols-2 gap-4">
-              <div className="flex justify-center align-middle">
-                {twoSeaterDragHori()}
-              </div>
-              <div className="flex justify-center align-middle">
-                {twoSeaterDragVerti()}
-              </div>
-              <div className="flex justify-center align-middle">
-                {sixSeaterDragHori()}
-              </div>
-              <div className="flex justify-center align-middle">
-                {sixSeaterDragVerti()}
-              </div>
-              <div className="flex justify-center align-middle">
-                {fourSeaterDrag()}
-              </div>
-            </div>
-            <div onClick={() => clearFloor()}>
-              <Button>Reset Floor</Button>
-            </div>
-          </div>
+          )}
         </div>
       </div>
-    </DndContext>
+    </div>
   );
 }
