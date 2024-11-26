@@ -11,6 +11,7 @@ import { createClient } from "@supabase/supabase-js";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -72,7 +73,9 @@ export default function DashboardScaffold() {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex w-full justify-end">
-            <Button>Make Reservation</Button>
+            <Link to="/create-reservation">
+              <Button>Make Reservation</Button>
+            </Link>
           </div>
         </header>
         <div className="flex flex-col h-[93.3%] gap-4 p-4">

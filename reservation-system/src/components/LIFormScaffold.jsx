@@ -97,7 +97,7 @@ export default function LIFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400 focus:border-white"
+                      className="border-zinc-600 focus:border-white"
                       placeholder="Email"
                       {...field}
                       {...form.register("email")}
@@ -114,7 +114,7 @@ export default function LIFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400 focus:border-white"
+                      className="border-zinc-600 focus:border-white"
                       placeholder="Password"
                       type="password"
                       {...field}

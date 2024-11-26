@@ -19,10 +19,57 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPA_URL,
+  import.meta.env.VITE_SUPA_ANON,
+);
 
 export default function ReserveDataTable() {
   const [reservations, setReservations] = useState(null);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    async function getUser() {
+      try {
+        const { data: userInfo, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error(error);
+          return;
+        }
+        setUserData(userInfo);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    async function getUserReservation() {
+      if (userData != null) {
+        try {
+          const { data: userReservationData, error } = await supabase
+            .from("has_reservation")
+            .select("restaurant_id,date_time,table_id,priority,additional_info")
+            .eq("user_id", userData.user.id);
+          if (error) {
+            console.error(error);
+            return;
+          }
+
+          setReservations(userReservationData);
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+    }
+
+    getUserReservation();
+  }, []);
 
   return (
     <div className="h-[100%]">
@@ -42,7 +89,7 @@ export default function ReserveDataTable() {
                 <Table className="text-white">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="">Name</TableHead>
+                      <TableHead className="">Restaurant Name</TableHead>
                       <TableHead className="w-[15%]">Table</TableHead>
                       <TableHead className="w-[15%]">Time</TableHead>
                       <TableHead className="">Priority</TableHead>
