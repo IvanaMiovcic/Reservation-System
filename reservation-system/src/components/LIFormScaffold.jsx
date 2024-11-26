@@ -51,23 +51,18 @@ export default function LIFormScaffold() {
       if (data.session) {
         console.log("login success");
       }
-
       if (error) {
         console.log(error);
       }
 
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-        if (user.user_metadata.account_type === "Customer") {
-          navigate("/customer-home");
-        } else {
-          navigate("/employee-home");
-        }
-      } catch (error) {
-        console.log(error);
+      if (user.user_metadata.account_type === "Customer") {
+        navigate("/customer-home");
+      } else {
+        navigate("/employee-home");
       }
     } catch (error) {
       console.log(error);

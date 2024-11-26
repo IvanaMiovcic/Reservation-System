@@ -5,7 +5,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import ReserveDataTable from "@/components/ReserveDataTable";
+import ReserveDataTable from "@/components/CDReserveDataTable";
 import { useNavigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { useEffect } from "react";

@@ -40,26 +40,56 @@ export default function ReserveDataTable() {
       try {
         const { data: userInfo } = await supabase.auth.getUser();
         setUserData(userInfo);
-        const { data: userReservation } = await supabase
-          .from("has_reservation")
-          .select("restaurant_id, date_time, priority, additional_info")
-          .eq("user_id", userInfo.user.id);
-        setReservations(userReservation);
         const { data: restaurantInfo } = await supabase
-          .from("restaurant")
-          .select("*")
-          .in(
-            "id",
-            userReservation.map((item) => item.restaurant_id),
-          );
+          .from("works_at")
+          .select("restaurant_id")
+          .eq("user_id", userInfo.user.id);
         setRestaurantData(restaurantInfo);
-      } catch (error) {
-        console.error("Error:", error);
+        const { data: restaurantReservation } = await supabase
+          .from("has_reservation")
+          .select(
+            "reservation_id, user_id, customer_name, date_time, priority, additional_info",
+          )
+          .in(
+            "restaurant_id",
+            restaurantInfo.map((item) => item.restaurant_id),
+          );
+        setReservations(restaurantReservation);
       } finally {
         setIsLoading(false);
       }
     }
+
     getData();
+
+    const channel = supabase
+      .channel("realtime_updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "has_reservation" },
+        (payload) => {
+          switch (payload.eventType) {
+            case "INSERT":
+              setReservations((prev) => [...prev, payload.new]);
+              break;
+            case "UPDATE":
+              setReservations((prev) =>
+                prev.map((item) =>
+                  item.reservation_id === payload.new.id ? payload.new : item,
+                ),
+              );
+              break;
+            case "DELETE":
+              setReservations((prev) =>
+                prev.filter((item) => item.reservation_id !== payload.old.id),
+              );
+              break;
+          }
+        },
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
   }, []);
 
   if (isLoading) {
@@ -74,7 +104,7 @@ export default function ReserveDataTable() {
           <Badge className="">{reservations ? reservations.length : 0}</Badge>
         </div>
         <div className="flex flex-col h-[92%]">
-          {reservations === null ? (
+          {reservations.length === 0 || reservations === null ? (
             <div className="text-zinc-600 text-xs font-mono m-auto">
               No reservations.
             </div>
@@ -84,7 +114,7 @@ export default function ReserveDataTable() {
                 <Table className="text-white">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="">Restaurant Name</TableHead>
+                      <TableHead className="">Name</TableHead>
                       <TableHead className="w-[15%]">Date</TableHead>
                       <TableHead className="w-[15%]">Time</TableHead>
                       <TableHead className="">Priority</TableHead>
@@ -94,13 +124,7 @@ export default function ReserveDataTable() {
                   <TableBody>
                     {reservations.map((reservation) => (
                       <TableRow key={reservation.restaurant_id}>
-                        <TableCell>
-                          {
-                            restaurantData.find(
-                              (item) => item.id === reservation.restaurant_id,
-                            )?.name
-                          }
-                        </TableCell>
+                        <TableCell>{reservation.customer_name}</TableCell>
                         <TableCell>
                           {moment(reservation.date_time).format("YYYY-MM-DD")}
                         </TableCell>

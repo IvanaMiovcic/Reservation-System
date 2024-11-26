@@ -15,6 +15,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { createClient } from "@supabase/supabase-js";
+import LoadingPage from "./LoadingPage";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -26,29 +27,25 @@ export function AppSidebar({ ...props }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function getUser() {
+    async function getData() {
       try {
-        const { data: userData, error } = await supabase.auth.getUser();
+        const { data: userInfo, error } = await supabase.auth.getUser();
         if (error) {
           console.error(error);
           return;
         }
-        setUserData(userData);
+        setUserData(userInfo);
       } catch (error) {
         console.error("Error:", error);
       } finally {
         setIsLoading(false);
       }
     }
-    getUser();
+    getData();
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="animate-spin h-8 w-8" />
-      </div>
-    );
+    return <LoadingPage />;
   }
 
   return (

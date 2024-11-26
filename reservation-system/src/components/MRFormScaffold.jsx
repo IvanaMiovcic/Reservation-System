@@ -124,10 +124,13 @@ export default function MRFormScaffold() {
       formData.reservation_time,
     );
 
+    const customerName = `${userData.user.user_metadata.firstname} ${userData.user.user_metadata.lastname}`;
+
     try {
       const { error } = await supabase.from("has_reservation").insert([
         {
           user_id: userData.user.id,
+          customer_name: customerName,
           restaurant_id: formData.restaurant_id,
           date_time: datetime,
           priority: formData.priority,

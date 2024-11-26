@@ -90,7 +90,7 @@ export function NavUser({ user }) {
                 Return to Landing page
               </DropdownMenuItem>
             </Link>
-            <div onClick={() => handleLogOut()}>
+            <div onClick={handleLogOut}>
               <DropdownMenuItem>
                 <LogOut />
                 Log Out
