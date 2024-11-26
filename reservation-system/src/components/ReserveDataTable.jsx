@@ -108,7 +108,7 @@ export default function ReserveDataTable() {
                           {moment(reservation.date_time).format("hh:mm A")}
                         </TableCell>
                         <TableCell>
-                          {reservation.priority === 1 ? (
+                          {reservation.priority === "high" ? (
                             <Badge variant="destructive">High</Badge>
                           ) : (
                             <Badge variant="secondary">Standard</Badge>
