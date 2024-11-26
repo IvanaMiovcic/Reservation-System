@@ -21,6 +21,8 @@ import {
 import { Ellipsis } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+import LoadingPage from "./LoadingPage";
+import moment from "moment/moment";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -30,46 +32,39 @@ const supabase = createClient(
 export default function ReserveDataTable() {
   const [reservations, setReservations] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [restaurantData, setRestaurantData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function getUser() {
+    async function getData() {
       try {
-        const { data: userInfo, error } = await supabase.auth.getUser();
-        if (error) {
-          console.error(error);
-          return;
-        }
+        const { data: userInfo } = await supabase.auth.getUser();
         setUserData(userInfo);
+        const { data: userReservation } = await supabase
+          .from("has_reservation")
+          .select("restaurant_id, date_time, priority, additional_info")
+          .eq("user_id", userInfo.user.id);
+        setReservations(userReservation);
+        const { data: restaurantInfo } = await supabase
+          .from("restaurant")
+          .select("*")
+          .in(
+            "id",
+            userReservation.map((item) => item.restaurant_id),
+          );
+        setRestaurantData(restaurantInfo);
       } catch (error) {
         console.error("Error:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
-
-    getUser();
+    getData();
   }, []);
 
-  useEffect(() => {
-    async function getUserReservation() {
-      if (userData != null) {
-        try {
-          const { data: userReservationData, error } = await supabase
-            .from("has_reservation")
-            .select("restaurant_id,date_time,table_id,priority,additional_info")
-            .eq("user_id", userData.user.id);
-          if (error) {
-            console.error(error);
-            return;
-          }
-
-          setReservations(userReservationData);
-        } catch (error) {
-          console.error("Error:", error);
-        }
-      }
-    }
-
-    getUserReservation();
-  }, []);
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className="h-[100%]">
@@ -90,7 +85,7 @@ export default function ReserveDataTable() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="">Restaurant Name</TableHead>
-                      <TableHead className="w-[15%]">Table</TableHead>
+                      <TableHead className="w-[15%]">Date</TableHead>
                       <TableHead className="w-[15%]">Time</TableHead>
                       <TableHead className="">Priority</TableHead>
                       <TableHead></TableHead>
@@ -98,10 +93,20 @@ export default function ReserveDataTable() {
                   </TableHeader>
                   <TableBody>
                     {reservations.map((reservation) => (
-                      <TableRow key={reservation.id}>
-                        <TableCell>{reservation.name}</TableCell>
-                        <TableCell>{reservation.table}</TableCell>
-                        <TableCell>{reservation.time}</TableCell>
+                      <TableRow key={reservation.restaurant_id}>
+                        <TableCell>
+                          {
+                            restaurantData.find(
+                              (item) => item.id === reservation.restaurant_id,
+                            )?.name
+                          }
+                        </TableCell>
+                        <TableCell>
+                          {moment(reservation.date_time).format("YYYY-MM-DD")}
+                        </TableCell>
+                        <TableCell>
+                          {moment(reservation.date_time).format("hh:mm A")}
+                        </TableCell>
                         <TableCell>
                           {reservation.priority === 1 ? (
                             <Badge variant="destructive">High</Badge>
@@ -117,19 +122,17 @@ export default function ReserveDataTable() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>
-                                Options for {reservation.name}
-                              </DropdownMenuLabel>
+                              <DropdownMenuLabel>Options</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => console.log(reservation.id)}
                               >
-                                Notify Customer
+                                View Reservation Details
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => console.log(reservation.id)}
                               >
-                                View Reservation Details
+                                Modify Reservation
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive"
