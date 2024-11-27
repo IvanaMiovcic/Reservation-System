@@ -1,7 +1,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -16,9 +15,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
@@ -32,10 +28,10 @@ const supabase = createClient(
   import.meta.env.VITE_SUPA_ANON,
 );
 
-export default function ReserveDataTable() {
-  const [reservations, setReservations] = useState(null);
+export default function FloorplanTable() {
   const [userData, setUserData] = useState(null);
-  const [restaurantData, setRestaurantData] = useState(null);
+  const [floorplans, setFloorplans] = useState(null);
+  const [floorplanData, setFloorplanData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -47,35 +43,37 @@ export default function ReserveDataTable() {
           .from("works_at")
           .select("restaurant_id")
           .eq("user_id", userInfo.user.id);
-        setRestaurantData(restaurantInfo);
-        const { data: restaurantReservation } = await supabase
-          .from("has_reservation")
-          .select(
-            "reservation_id, user_id, customer_name, date_time, priority, additional_info",
-          )
+        const { data: restaurantFloorplans } = await supabase
+          .from("uses_floorplan")
+          .select("*")
+          .eq("restaurant_id", restaurantInfo[0].restaurant_id);
+        setFloorplans(restaurantFloorplans);
+        const { data: floorplanInfo } = await supabase
+          .from("floorplan")
+          .select("*")
           .in(
-            "restaurant_id",
-            restaurantInfo.map((item) => item.restaurant_id),
+            "floorplan_id",
+            restaurantFloorplans.map((item) => item.floorplan_id),
           );
-        setReservations(restaurantReservation);
+        setFloorplanData(floorplanInfo);
 
-        const channel = supabase
+        const restaurantFloorPlanChannel = supabase
           .channel("realtime_updates")
           .on(
             "postgres_changes",
             {
               event: "*",
               schema: "public",
-              table: "has_reservation",
-              filter: `restaurant_id=eq.(${restaurantInfo[0].restaurant_id})`,
+              table: "uses_floorplan",
+              filter: `restaurant_id=eq.${restaurantInfo[0].restaurant_id}`,
             },
             (payload) => {
               switch (payload.eventType) {
                 case "INSERT":
-                  setReservations((prev) => [...prev, payload.new]);
+                  setFloorplans((prev) => [...prev, payload.new]);
                   break;
                 case "UPDATE":
-                  setReservations((prev) =>
+                  setFloorplans((prev) =>
                     prev.map((item) =>
                       item.reservation_id === payload.new.id
                         ? payload.new
@@ -84,7 +82,7 @@ export default function ReserveDataTable() {
                   );
                   break;
                 case "DELETE":
-                  setReservations((prev) =>
+                  setFloorplans((prev) =>
                     prev.filter(
                       (item) => item.reservation_id !== payload.old.id,
                     ),
@@ -95,7 +93,46 @@ export default function ReserveDataTable() {
           )
           .subscribe();
 
-        return () => supabase.removeChannel(channel);
+        const floorPlanDataChannel = supabase
+          .channel("realtime_updates")
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "floorplan",
+              filter: `floorplan_id=eq.${floorplans.map((item) => item.floorplan_id)}`,
+            },
+            (payload) => {
+              switch (payload.eventType) {
+                case "INSERT":
+                  setFloorplanData((prev) => [...prev, payload.new]);
+                  break;
+                case "UPDATE":
+                  setFloorplanData((prev) =>
+                    prev.map((item) =>
+                      item.reservation_id === payload.new.id
+                        ? payload.new
+                        : item,
+                    ),
+                  );
+                  break;
+                case "DELETE":
+                  setFloorplanData((prev) =>
+                    prev.filter(
+                      (item) => item.reservation_id !== payload.old.id,
+                    ),
+                  );
+                  break;
+              }
+            },
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(restaurantFloorPlanChannel);
+          supabase.removeChannel(floorPlanDataChannel);
+        };
       } finally {
         setIsLoading(false);
       }
@@ -109,16 +146,16 @@ export default function ReserveDataTable() {
   }
 
   return (
-    <div className="h-[100%]">
+    <div className="h-full">
       <div className="flex flex-col rounded-md gap-3 p-5 h-full border">
         <div className="flex flex-row space-x-3">
-          <div className="text-white text-xl">Reservations</div>
-          <Badge className="">{reservations ? reservations.length : 0}</Badge>
+          <div className="text-white text-xl">Manage Floorplans</div>
+          <Badge className="">{floorplans ? floorplans.length : 0}</Badge>
         </div>
         <div className="flex flex-col h-[92%]">
-          {reservations.length === 0 || reservations === null ? (
+          {floorplans.length === 0 || floorplans === null ? (
             <div className="text-zinc-600 text-xs font-mono m-auto">
-              No reservations.
+              No floorplans.
             </div>
           ) : (
             <ScrollArea>
@@ -126,28 +163,27 @@ export default function ReserveDataTable() {
                 <Table className="text-white">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="">Name</TableHead>
-                      <TableHead className="w-[15%]">Date</TableHead>
-                      <TableHead className="w-[15%]">Time</TableHead>
-                      <TableHead className="">Priority</TableHead>
+                      <TableHead className="">Floorplan Name</TableHead>
+                      <TableHead className="">Status</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reservations.map((reservation) => (
-                      <TableRow key={reservation.reservation_id}>
-                        <TableCell>{reservation.customer_name}</TableCell>
+                    {floorplans.map((floorplan) => (
+                      <TableRow key={floorplan.floorplan_id}>
                         <TableCell>
-                          {moment(reservation.date_time).format("YYYY-MM-DD")}
+                          {
+                            floorplanData.find(
+                              (item) =>
+                                item.floorplan_id === floorplan.floorplan_id,
+                            )?.name
+                          }
                         </TableCell>
                         <TableCell>
-                          {moment(reservation.date_time).format("hh:mm A")}
-                        </TableCell>
-                        <TableCell>
-                          {reservation.priority === "high" ? (
-                            <Badge variant="destructive">High</Badge>
+                          {floorplan.is_active === true ? (
+                            <Badge variant="destructive">Active</Badge>
                           ) : (
-                            <Badge variant="secondary">Standard</Badge>
+                            <Badge variant="secondary">Inactive</Badge>
                           )}
                         </TableCell>
                         <TableCell className="text-center">
@@ -159,36 +195,23 @@ export default function ReserveDataTable() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>
-                                Options for {reservation.customer_name}
+                                {`Options for ${
+                                  floorplanData.find(
+                                    (item) =>
+                                      item.floorplan_id ===
+                                      floorplan.floorplan_id,
+                                  )?.name
+                                }`}
                               </DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  Notify customer
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem>
-                                    Ready for customer
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  View reservation details
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem>
-                                    {reservation.additional_info === null
-                                      ? reservation.additional_info
-                                      : "No additional details"}
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
+                              <DropdownMenuItem>Set active</DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive"
-                                onClick={() => console.log(reservation.id)}
+                                onClick={() =>
+                                  console.log(floorplan.floorplan_id)
+                                }
                               >
-                                Delete Reservation
+                                Delete floorplan
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

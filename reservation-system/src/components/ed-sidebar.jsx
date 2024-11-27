@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { createClient } from "@supabase/supabase-js";
 import LoadingPage from "./LoadingPage";
+import { Link } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -57,10 +58,12 @@ export function AppSidebar({ ...props }) {
         <SidebarSeparator className="mx-0" />
         <SidebarMenu className="gap-4 mt-4">
           <SidebarMenuItem>
-            <SidebarMenuButton className="w-[93%] m-auto">
-              <Layers3 />
-              Manage Floorplans
-            </SidebarMenuButton>
+            <Link to="/modify-floorplan">
+              <SidebarMenuButton className="w-[93%] m-auto">
+                <Layers3 />
+                Manage Floorplans
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>

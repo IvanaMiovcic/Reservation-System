@@ -13,9 +13,15 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
@@ -53,6 +59,44 @@ export default function ReserveDataTable() {
             userReservation.map((item) => item.restaurant_id),
           );
         setRestaurantData(restaurantInfo);
+
+        const channel = supabase
+          .channel("realtime_updates")
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "has_reservation",
+              filter: `user_id=eq.(${userInfo.user.id})`,
+            },
+            (payload) => {
+              switch (payload.eventType) {
+                case "INSERT":
+                  setReservations((prev) => [...prev, payload.new]);
+                  break;
+                case "UPDATE":
+                  setReservations((prev) =>
+                    prev.map((item) =>
+                      item.reservation_id === payload.new.id
+                        ? payload.new
+                        : item,
+                    ),
+                  );
+                  break;
+                case "DELETE":
+                  setReservations((prev) =>
+                    prev.filter(
+                      (item) => item.reservation_id !== payload.old.id,
+                    ),
+                  );
+                  break;
+              }
+            },
+          )
+          .subscribe();
+
+        return () => supabase.removeChannel(channel);
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -61,35 +105,6 @@ export default function ReserveDataTable() {
     }
 
     getData();
-
-    const channel = supabase
-      .channel("realtime_updates")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "has_reservation" },
-        (payload) => {
-          switch (payload.eventType) {
-            case "INSERT":
-              setReservations((prev) => [...prev, payload.new]);
-              break;
-            case "UPDATE":
-              setReservations((prev) =>
-                prev.map((item) =>
-                  item.reservation_id === payload.new.id ? payload.new : item,
-                ),
-              );
-              break;
-            case "DELETE":
-              setReservations((prev) =>
-                prev.filter((item) => item.reservation_id !== payload.old.id),
-              );
-              break;
-          }
-        },
-      )
-      .subscribe();
-
-    return () => supabase.removeChannel(channel);
   }, []);
 
   if (isLoading) {
@@ -154,11 +169,18 @@ export default function ReserveDataTable() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Options</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => console.log(reservation.id)}
-                              >
-                                View Reservation Details
-                              </DropdownMenuItem>
+                              <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                  View reservation details
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent>
+                                  <DropdownMenuItem>
+                                    {reservation.additional_info === null
+                                      ? reservation.additional_info
+                                      : "No additional details"}
+                                  </DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                              </DropdownMenuSub>
                               <DropdownMenuItem
                                 onClick={() => console.log(reservation.id)}
                               >

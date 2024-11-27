@@ -34,7 +34,7 @@ function App() {
         <Route path="/view-seating-chart" element={<ViewSeatingChart />} />
         <Route path="/view-queue" element={<ViewQueue />} />
         <Route path="/send-notification" element={<SendNotification />} />
-        <Route path="/add-table" element={<AddTable />} />
+        <Route path="/add-floorplan" element={<AddTable />} />
         <Route path="/modify-table" element={<ModifyTable />} />
         <Route path="/remove-table" element={<RemoveTable />} />
       </Routes>

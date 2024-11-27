@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DndContext } from "@dnd-kit/core";
 import { Droppable } from "./Droppable";
 import { Draggable } from "./Draggable";
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "./ui/input";
 import { Pencil } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -27,6 +28,64 @@ const supabase = createClient(
 );
 
 export default function FloorPlanDnD() {
+  const [configuration, setConfiguration] = useState({});
+  const [floorName, setFloorName] = useState("New Floorplan");
+  const [textField, setTextField] = useState(floorName);
+  const [tables, setTables] = useState({});
+  const navigate = useNavigate();
+
+  async function saveFloor() {
+    const floorplan_id = uuidv4();
+
+    try {
+      const { data: userInfo } = await supabase.auth.getUser();
+
+      const { data: restaurantInfo } = await supabase
+        .from("works_at")
+        .select("restaurant_id")
+        .eq("user_id", userInfo.user.id);
+
+      const { error: floorplan_error } = await supabase
+        .from("floorplan")
+        .insert([
+          {
+            floorplan_id: floorplan_id,
+            name: floorName,
+            configuration: configuration,
+          },
+        ]);
+
+      if (floorplan_error) {
+        console.log(floorplan_error);
+      }
+
+      const { error: uses_floorplan_error } = await supabase
+        .from("uses_floorplan")
+        .insert([
+          {
+            floorplan_id: floorplan_id,
+            restaurant_id: restaurantInfo[0].restaurant_id,
+          },
+        ]);
+
+      if (uses_floorplan_error) {
+        console.log(uses_floorplan_error);
+      }
+
+      const { error: table_error } = await supabase
+        .from("table")
+        .insert(Object.values(tables));
+
+      if (table_error) {
+        console.log(table_error);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      navigate("/modify-floorplan");
+    }
+  }
+
   function twoSeaterDragHori() {
     const uuid = uuidv4();
     return (
@@ -71,11 +130,6 @@ export default function FloorPlanDnD() {
       </Draggable>
     );
   }
-
-  const [configuration, setConfiguration] = useState({});
-  const [floorName, setFloorName] = useState("New Floorplan");
-  const [textField, setTextField] = useState(floorName);
-  const [tables, setTables] = useState({});
 
   function getComponentType(id) {
     return id.split("+")[0] || null;
@@ -141,41 +195,6 @@ export default function FloorPlanDnD() {
     setTextField(event.target.value);
   }
 
-  async function saveFloor() {
-    const floorplan_id = uuidv4();
-    //const floor_configuration = Object.entries(configuration).map((item) => ({
-    //  [item[0]]: item[1],
-    //}));
-
-    try {
-      const { dbData, error } = await supabase.from("floorplan").insert([
-        {
-          floorplan_id: floorplan_id,
-          name: floorName,
-          configuration: configuration,
-        },
-      ]);
-
-      if (error) {
-        console.log(error);
-      }
-
-      try {
-        const { dbData2, error } = await supabase
-          .from("table")
-          .insert(Object.values(tables));
-
-        if (error) {
-          console.log(error);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   function clearFloor() {
     {
       setConfiguration(() => ({}));
@@ -209,7 +228,7 @@ export default function FloorPlanDnD() {
 
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
-      <div className="flex flex-col rounded-md gap-4 p-5 h-1/2 border">
+      <div className="flex flex-col rounded-md gap-4 p-5 h-[90%] border">
         <div className="text-white flex h-[8%]">
           <Dialog>
             <DialogTrigger asChild>
@@ -271,22 +290,20 @@ export default function FloorPlanDnD() {
             </div>
           </div>
           <div className="flex flex-col items-center justify-between w-[20%]">
-            <div className="inline-grid grid-cols-2 gap-4">
-              <div className="flex justify-center align-middle">
-                {twoSeaterDragHori()}
-              </div>
-              <div className="flex justify-center align-middle">
-                {twoSeaterDragVerti()}
-              </div>
-              <div className="flex justify-center align-middle">
-                {sixSeaterDragHori()}
-              </div>
-              <div className="flex justify-center align-middle">
-                {sixSeaterDragVerti()}
-              </div>
-              <div className="flex justify-center align-middle">
-                {fourSeaterDrag()}
-              </div>
+            <div className="flex justify-center align-middle">
+              {twoSeaterDragHori()}
+            </div>
+            <div className="flex justify-center align-middle">
+              {twoSeaterDragVerti()}
+            </div>
+            <div className="flex justify-center align-middle">
+              {sixSeaterDragHori()}
+            </div>
+            <div className="flex justify-center align-middle">
+              {sixSeaterDragVerti()}
+            </div>
+            <div className="flex justify-center align-middle">
+              {fourSeaterDrag()}
             </div>
 
             <div className="flex flex-row justify-between gap-4">

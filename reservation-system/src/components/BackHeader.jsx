@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 export default function BackHeader(props) {
   return (
-    <div className="flex flex-row justify-between pt-10 sm:pt-6">
+    <div className="flex flex-row justify-between">
       <Link to={props.backLink}>
         <div className="flex flex-row justify-center items-center gap-2 py-1 font-poppins text-white text-xl">
           <Button
