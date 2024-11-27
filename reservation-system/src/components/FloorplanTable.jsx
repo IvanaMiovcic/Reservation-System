@@ -30,24 +30,53 @@ const supabase = createClient(
 
 export default function FloorplanTable() {
   const [userData, setUserData] = useState(null);
+  const [restaurantData, setRestaurantData] = useState(null);
   const [floorplans, setFloorplans] = useState(null);
   const [floorplanData, setFloorplanData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  async function setActive(floorplan_id) {
+    try {
+      const { error: active_to_inactive_error } = await supabase
+        .from("uses_floorplan")
+        .update({ is_active: false })
+        .eq("restaurant_id", restaurantData[0].restaurant_id);
+      if (active_to_inactive_error) {
+        console.log(active_to_inactive_error);
+      }
+
+      const { error: set_active_error } = await supabase
+        .from("uses_floorplan")
+        .update({ is_active: true })
+        .eq("floorplan_id", floorplan_id);
+      if (set_active_error) {
+        console.log(set_active_error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
+    let restaurantFloorPlanChannel;
+
     async function getData() {
       try {
         const { data: userInfo } = await supabase.auth.getUser();
         setUserData(userInfo);
+
         const { data: restaurantInfo } = await supabase
           .from("works_at")
           .select("restaurant_id")
           .eq("user_id", userInfo.user.id);
+        setRestaurantData(restaurantInfo);
+
         const { data: restaurantFloorplans } = await supabase
           .from("uses_floorplan")
           .select("*")
           .eq("restaurant_id", restaurantInfo[0].restaurant_id);
         setFloorplans(restaurantFloorplans);
+
         const { data: floorplanInfo } = await supabase
           .from("floorplan")
           .select("*")
@@ -57,7 +86,7 @@ export default function FloorplanTable() {
           );
         setFloorplanData(floorplanInfo);
 
-        const restaurantFloorPlanChannel = supabase
+        restaurantFloorPlanChannel = supabase
           .channel("realtime_updates")
           .on(
             "postgres_changes",
@@ -65,7 +94,7 @@ export default function FloorplanTable() {
               event: "*",
               schema: "public",
               table: "uses_floorplan",
-              filter: `restaurant_id=eq.${restaurantInfo[0].restaurant_id}`,
+              filter: `restaurant_id=in.(${restaurantInfo[0].restaurant_id})`,
             },
             (payload) => {
               switch (payload.eventType) {
@@ -75,52 +104,17 @@ export default function FloorplanTable() {
                 case "UPDATE":
                   setFloorplans((prev) =>
                     prev.map((item) =>
-                      item.reservation_id === payload.new.id
+                      item.floorplan_id === payload.new.floorplan_id
                         ? payload.new
                         : item,
                     ),
                   );
+                  console.log("Realtime update received:", payload);
                   break;
                 case "DELETE":
                   setFloorplans((prev) =>
                     prev.filter(
-                      (item) => item.reservation_id !== payload.old.id,
-                    ),
-                  );
-                  break;
-              }
-            },
-          )
-          .subscribe();
-
-        const floorPlanDataChannel = supabase
-          .channel("realtime_updates")
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-              schema: "public",
-              table: "floorplan",
-              filter: `floorplan_id=eq.${floorplans.map((item) => item.floorplan_id)}`,
-            },
-            (payload) => {
-              switch (payload.eventType) {
-                case "INSERT":
-                  setFloorplanData((prev) => [...prev, payload.new]);
-                  break;
-                case "UPDATE":
-                  setFloorplanData((prev) =>
-                    prev.map((item) =>
-                      item.reservation_id === payload.new.id
-                        ? payload.new
-                        : item,
-                    ),
-                  );
-                  break;
-                case "DELETE":
-                  setFloorplanData((prev) =>
-                    prev.filter(
-                      (item) => item.reservation_id !== payload.old.id,
+                      (item) => item.floorplan_id !== payload.old.floorplan_id,
                     ),
                   );
                   break;
@@ -131,8 +125,9 @@ export default function FloorplanTable() {
 
         return () => {
           supabase.removeChannel(restaurantFloorPlanChannel);
-          supabase.removeChannel(floorPlanDataChannel);
         };
+      } catch (error) {
+        console.log(error);
       } finally {
         setIsLoading(false);
       }
@@ -204,7 +199,13 @@ export default function FloorplanTable() {
                                 }`}
                               </DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>Set active</DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  void setActive(floorplan.floorplan_id)
+                                }
+                              >
+                                Set active
+                              </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() =>

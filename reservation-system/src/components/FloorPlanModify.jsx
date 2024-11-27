@@ -16,11 +16,12 @@ const supabase = createClient(
 export default function FloorPlanModify() {
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState(null);
-  const [restaurantFloorPlans, setRestaurantFloorPlans] = useState(null);
+  const [floorplans, setFloorplans] = useState(null);
   const [floorplanData, setFloorplanData] = useState(null);
-  const [activeFloorplan, setActiveFloorplan] = useState(null);
 
   useEffect(() => {
+    let restaurantFloorPlanChannel;
+    let floorPlanDataChannel;
     async function getData() {
       try {
         const { data: userInfo, error } = await supabase.auth.getUser();
@@ -28,37 +29,75 @@ export default function FloorPlanModify() {
           console.error(error);
         }
         setUserData(userInfo);
+
         const { data: restaurantInfo } = await supabase
           .from("works_at")
           .select("restaurant_id")
           .eq("user_id", userInfo.user.id);
+
         const { data: restaurantFloorplans } = await supabase
           .from("uses_floorplan")
           .select("*")
-          .eq("restaurant_id", restaurantInfo.restaurant_id);
+          .eq("restaurant_id", restaurantInfo[0].restaurant_id);
+        setFloorplans(restaurantFloorplans);
+
         const { data: floorplanInfo } = await supabase
           .from("floorplan")
           .select("*")
-          .eq(
+          .in(
             "floorplan_id",
             restaurantFloorplans.map((item) => item.floorplan_id),
           );
-        console.log(floorplanInfo);
         setFloorplanData(floorplanInfo);
-        setActiveFloorplan(
-          restaurantFloorPlans.find((item) => item.is_active === true)
-            ?.floorplan_id,
-        );
 
-        const restaurantFloorPlanChannel = supabase
-          .channel("realtime_updates")
+        restaurantFloorPlanChannel = supabase
+          .channel("restaurantFloorplansUpdates")
           .on(
             "postgres_changes",
             {
               event: "*",
               schema: "public",
               table: "uses_floorplan",
-              filter: `restaurant_id=eq.${restaurantInfo[0].restaurant_id}`,
+              filter: `restaurant_id=in.(${restaurantInfo[0].restaurant_id})`,
+            },
+            (payload) => {
+              switch (payload.eventType) {
+                case "INSERT":
+                  setFloorplans((prev) => [...prev, payload.new]);
+
+                  break;
+                case "UPDATE":
+                  setFloorplans((prev) =>
+                    prev.map((item) =>
+                      item.floorplan_id === payload.new.floorplan_id
+                        ? payload.new
+                        : item,
+                    ),
+                  );
+
+                  break;
+                case "DELETE":
+                  setFloorplans((prev) =>
+                    prev.filter(
+                      (item) => item.floorplan_id !== payload.old.floorplan_id,
+                    ),
+                  );
+
+                  break;
+              }
+            },
+          )
+          .subscribe();
+
+        floorPlanDataChannel = supabase
+          .channel("floorplanDataUpdates")
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "floorplan",
+              filter: `floorplan_id=in.(${restaurantFloorplans.map((item) => item.floorplan_id)})`,
             },
             (payload) => {
               switch (payload.eventType) {
@@ -68,7 +107,7 @@ export default function FloorPlanModify() {
                 case "UPDATE":
                   setFloorplanData((prev) =>
                     prev.map((item) =>
-                      item.reservation_id === payload.new.id
+                      item.floorplan_id === payload.new.floorplan_id
                         ? payload.new
                         : item,
                     ),
@@ -77,7 +116,7 @@ export default function FloorPlanModify() {
                 case "DELETE":
                   setFloorplanData((prev) =>
                     prev.filter(
-                      (item) => item.reservation_id !== payload.old.id,
+                      (item) => item.floorplan_id !== payload.old.floorplan_id,
                     ),
                   );
                   break;
@@ -86,7 +125,12 @@ export default function FloorPlanModify() {
           )
           .subscribe();
 
-        return () => supabase.removeChannel(restaurantFloorPlanChannel);
+        return () => {
+          supabase.removeChannel(restaurantFloorPlanChannel);
+          supabase.removeChannel(floorPlanDataChannel);
+        };
+      } catch (error) {
+        console.log(error);
       } finally {
         setIsLoading(false);
       }
@@ -125,13 +169,16 @@ export default function FloorPlanModify() {
 
   return (
     <div className="flex flex-col rounded-md gap-4 p-5 h-full border">
-      {activeFloorplan !== null ? (
+      {floorplans.find((item) => item.is_active === true) ? (
         <div className="flex flex-row text-xl gap-3 h-[8%]">
           <div className="text-white">Active Floorplan</div>
           <Badge>
             {
               floorplanData.find(
-                (item) => item.floorplan_id === activeFloorplan,
+                (item) =>
+                  item.floorplan_id ===
+                  floorplans.find((item) => item.is_active === true)
+                    ?.floorplan_id,
               )?.name
             }
           </Badge>
@@ -144,7 +191,7 @@ export default function FloorPlanModify() {
 
       <div className="flex flex-row h-[92%] space-x-4">
         <div className="flex flex-row w-full">
-          {activeFloorplan === null ? (
+          {!floorplans.find((item) => item.is_active === true) ? (
             <div className="text-zinc-600 text-xs font-mono m-auto">
               No active floorplan.
             </div>
@@ -166,11 +213,17 @@ export default function FloorPlanModify() {
                   <div key={cellId} id={cellId}>
                     <div className="flex justify-center items-center col-span-1 row-span-1 text-white w-full h-full bg-background">
                       {floorplanData.find(
-                        (item) => item.floorplan_id === activeFloorplan,
+                        (item) =>
+                          item.floorplan_id ===
+                          floorplans.find((item) => item.is_active === true)
+                            ?.floorplan_id,
                       )?.configuration[cellId] ? (
                         renderComponent(
                           floorplanData.find(
-                            (item) => item.floorplan_id === activeFloorplan,
+                            (item) =>
+                              item.floorplan_id ===
+                              floorplans.find((item) => item.is_active === true)
+                                ?.floorplan_id,
                           )?.configuration[cellId],
                         )
                       ) : (
