@@ -7,6 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -38,6 +39,8 @@ const schema = Joi.object({
 });
 
 export default function LIFormScaffold() {
+  const navigate = useNavigate();
+
   async function onSubmit(form_data) {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -48,14 +51,24 @@ export default function LIFormScaffold() {
       if (data.session) {
         console.log("login success");
       }
-
       if (error) {
         console.log(error);
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user.user_metadata.account_type === "Customer") {
+        navigate("/customer-home");
+      } else {
+        navigate("/employee-home");
       }
     } catch (error) {
       console.log(error);
     }
   }
+
   const form = useForm({
     resolver: joiResolver(schema),
     defaultValues: {
@@ -79,7 +92,7 @@ export default function LIFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400 focus:border-white"
+                      className="border-zinc-600 focus:border-white"
                       placeholder="Email"
                       {...field}
                       {...form.register("email")}
@@ -96,7 +109,7 @@ export default function LIFormScaffold() {
                 <FormItem>
                   <FormControl className="text-xs sm:text-sm">
                     <Input
-                      className="border-zinc-400 focus:border-white"
+                      className="border-zinc-600 focus:border-white"
                       placeholder="Password"
                       type="password"
                       {...field}
