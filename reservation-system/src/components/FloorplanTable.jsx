@@ -57,9 +57,48 @@ export default function FloorplanTable() {
     }
   }
 
+  async function deleteFloorplan(floorplan_id) {
+    try {
+      if (
+        floorplans.find((item) => item.is_active === true)?.floorplan_id ===
+        floorplan_id
+      ) {
+        const { error: active_to_inactive_error } = await supabase
+          .from("uses_floorplan")
+          .update({ is_active: false })
+          .eq("restaurant_id", restaurantData[0].restaurant_id);
+        if (active_to_inactive_error) {
+          console.log(active_to_inactive_error);
+        }
+      }
+
+      const { error } = await supabase
+        .from("floorplan")
+        .delete()
+        .eq("floorplan_id", floorplan_id);
+      if (error) {
+        console.log(error);
+      }
+
+      const associatedTableIds = floorplanData
+        .filter((item) => item.floorplan_id === floorplan_id)
+        .flatMap((item) =>
+          Object.values(item.configuration).map((table) => table.table_id),
+        );
+      const { error: delete_associated_tables_error } = await supabase
+        .from("table")
+        .delete()
+        .in("table_id", associatedTableIds);
+      if (delete_associated_tables_error) {
+        console.log(delete_associated_tables_error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     let restaurantFloorPlanChannel;
-
     async function getData() {
       try {
         const { data: userInfo } = await supabase.auth.getUser();
@@ -97,10 +136,12 @@ export default function FloorplanTable() {
               filter: `restaurant_id=in.(${restaurantInfo[0].restaurant_id})`,
             },
             (payload) => {
+              console.log(payload);
               switch (payload.eventType) {
                 case "INSERT":
                   setFloorplans((prev) => [...prev, payload.new]);
                   break;
+
                 case "UPDATE":
                   setFloorplans((prev) =>
                     prev.map((item) =>
@@ -109,13 +150,11 @@ export default function FloorplanTable() {
                         : item,
                     ),
                   );
-                  console.log("Realtime update received:", payload);
                   break;
+
                 case "DELETE":
                   setFloorplans((prev) =>
-                    prev.filter(
-                      (item) => item.floorplan_id !== payload.old.floorplan_id,
-                    ),
+                    prev.filter((item) => item.id !== payload.id),
                   );
                   break;
               }
@@ -209,7 +248,7 @@ export default function FloorplanTable() {
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() =>
-                                  console.log(floorplan.floorplan_id)
+                                  void deleteFloorplan(floorplan.floorplan_id)
                                 }
                               >
                                 Delete floorplan
