@@ -63,12 +63,12 @@ export default function FloorplanTable() {
         floorplans.find((item) => item.is_active === true)?.floorplan_id ===
         floorplan_id
       ) {
-        const { error: active_to_inactive_error } = await supabase
+        const { error: active_to_null_error } = await supabase
           .from("uses_floorplan")
-          .update({ is_active: false })
-          .eq("restaurant_id", restaurantData[0].restaurant_id);
-        if (active_to_inactive_error) {
-          console.log(active_to_inactive_error);
+          .update({ is_active: null })
+          .eq("floorplan_id", floorplan_id);
+        if (active_to_null_error) {
+          console.log(active_to_null_error);
         }
       }
 
@@ -216,6 +216,8 @@ export default function FloorplanTable() {
                         <TableCell>
                           {floorplan.is_active === true ? (
                             <Badge variant="destructive">Active</Badge>
+                          ) : floorplan.is_active === null ? (
+                            <Badge variant="outline">Deleted</Badge>
                           ) : (
                             <Badge variant="secondary">Inactive</Badge>
                           )}
