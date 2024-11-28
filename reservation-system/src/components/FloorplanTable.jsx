@@ -59,17 +59,12 @@ export default function FloorplanTable() {
 
   async function deleteFloorplan(floorplan_id) {
     try {
-      if (
-        floorplans.find((item) => item.is_active === true)?.floorplan_id ===
-        floorplan_id
-      ) {
-        const { error: active_to_null_error } = await supabase
-          .from("uses_floorplan")
-          .update({ is_active: null })
-          .eq("floorplan_id", floorplan_id);
-        if (active_to_null_error) {
-          console.log(active_to_null_error);
-        }
+      const { error: active_to_null_error } = await supabase
+        .from("uses_floorplan")
+        .update({ is_active: null })
+        .eq("floorplan_id", floorplan_id);
+      if (active_to_null_error) {
+        console.log(active_to_null_error);
       }
 
       const { error } = await supabase
@@ -136,7 +131,6 @@ export default function FloorplanTable() {
               filter: `restaurant_id=in.(${restaurantInfo[0].restaurant_id})`,
             },
             (payload) => {
-              console.log(payload);
               switch (payload.eventType) {
                 case "INSERT":
                   setFloorplans((prev) => [...prev, payload.new]);
