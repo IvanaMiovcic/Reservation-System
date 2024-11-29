@@ -8,62 +8,48 @@ import {
 import ReserveDataTable from "@/components/CDReserveDataTable";
 import { useNavigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import LoadingPage from "@/components/LoadingPage";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
   import.meta.env.VITE_SUPA_ANON,
 );
 
-function get_date() {
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const d = new Date();
-  const date = d.getDate();
-  const month_index = d.getMonth();
-  const year = d.getFullYear();
-  return `${months[month_index]} ${date}, ${year}`;
-}
-
 export default function DashboardScaffold() {
   const navigate = useNavigate();
-
-  async function checkUser() {
-    try {
-      const { data: user_data, error } = await supabase.auth.getUser();
-      if (error) {
-        navigate("/log-in");
-      }
-      if (
-        user_data.user.user_metadata.account_type === "Employee" ||
-        user_data.user.user_metadata.account_type === "Manager"
-      ) {
-        navigate("/employee-home");
-      }
-    } catch (error) {
-      console.log(error);
-      navigate("/");
-    }
-  }
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    async function checkUser() {
+      try {
+        const { data: user_data, error } = await supabase.auth.getUser();
+        if (error) {
+          navigate("/log-in");
+        }
+        if (
+          user_data.user.user_metadata.account_type === "Employee" ||
+          user_data.user.user_metadata.account_type === "Manager"
+        ) {
+          navigate("/employee-home");
+        }
+      } catch (error) {
+        console.log(error);
+        navigate("/");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
     checkUser();
   }, []);
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <SidebarProvider>
