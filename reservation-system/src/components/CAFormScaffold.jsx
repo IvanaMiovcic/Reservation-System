@@ -127,26 +127,26 @@ export default function CAFormScaffold() {
         });
       } else {
         if (form_data.restaurant_id) {
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
+          const { data: userInfo } = await supabase.auth.getUser();
 
-          const { data: dbData, error_worksAt } = await supabase
+          const { error: error_worksAt } = await supabase
             .from("works_at")
             .insert([
-              { user_id: user.id, restaurant_id: form_data.restaurant_id },
+              {
+                user_id: userInfo.user.id,
+                restaurant_id: form_data.restaurant_id,
+              },
             ]);
 
           if (error_worksAt) {
             console.log(error_worksAt);
+          }
+        }
+        if (data) {
+          if (data.user.user_metadata.account_type === "Customer") {
+            navigate("/customer-home");
           } else {
-            if (dbData) {
-              if (data.user.user_metadata.account_type === "Customer") {
-                navigate("/customer-home");
-              } else {
-                navigate("/employee-home");
-              }
-            }
+            navigate("/employee-home");
           }
         }
       }

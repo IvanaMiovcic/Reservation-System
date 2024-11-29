@@ -72,7 +72,42 @@
     "email": "rachel.kim@example.com",
     "phone": "555-234-5678",
     "password": "Ck3@wS6!"
-  }
+  },
+  {
+      "firstName": "Alexander",
+      "lastName": "Singh",
+      "email": "a.singh@example.com",
+      "phone": "555-456-7890",
+      "password": "Gm9#nK4$"
+    },
+    {
+      "firstName": "Isabella",
+      "lastName": "Martinez",
+      "email": "isabella.m@example.com",
+      "phone": "555-567-8901",
+      "password": "Wq7*fL2!"
+    },
+    {
+      "firstName": "Jordan",
+      "lastName": "Brown",
+      "email": "jordan.brown@example.com",
+      "phone": "555-678-9012",
+      "password": "Hy5@pT3#"
+    },
+    {
+      "firstName": "Sophie",
+      "lastName": "Lee",
+      "email": "sophie.lee@example.com",
+      "phone": "555-789-0123",
+      "password": "Jx6$nR9@"
+    },
+    {
+      "firstName": "Daniel",
+      "lastName": "Miller",
+      "email": "d.miller@example.com",
+      "phone": "555-890-1234",
+      "password": "Bk4!mQ7%"
+    }
 ]
 
 ```
