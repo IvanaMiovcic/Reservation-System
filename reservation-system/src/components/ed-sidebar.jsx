@@ -57,7 +57,7 @@ export function AppSidebar({ ...props }) {
         <Calendar mode="single" />
         <SidebarSeparator className="mx-0" />
         <SidebarMenu className="gap-4 mt-4">
-          {userData.user.user_metadata === "Manager" ? (
+          {userData.user.user_metadata.account_type === "Manager" ? (
             <SidebarMenuItem>
               <Link to="/modify-floorplan">
                 <SidebarMenuButton className="w-[93%] m-auto">
