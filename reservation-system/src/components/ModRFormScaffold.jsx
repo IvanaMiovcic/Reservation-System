@@ -1,6 +1,6 @@
 import Joi from "joi";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "./ui/button";
 import { joiResolver } from "@hookform/resolvers/joi";
@@ -14,15 +14,6 @@ import {
 } from "./ui/form";
 import { cn } from "@/lib/utils";
 import { createClient } from "@supabase/supabase-js";
-import { ChevronsUpDown, Check } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
@@ -39,32 +30,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Textarea } from "./ui/textarea";
+import LoadingPage from "./LoadingPage";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
   import.meta.env.VITE_SUPA_ANON,
 );
 
-async function getRestaurants() {
-  try {
-    let { data, error } = await supabase.from("restaurant").select("*");
-
-    if (error) {
-      console.log(error);
-    } else {
-      return data;
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-const restaurants = await getRestaurants();
-
 const schema = Joi.object({
-  restaurant_id: Joi.string().required().messages({
-    "string.empty": "Please choose a restaurant",
-  }),
   reservation_date: Joi.date().required().messages({
     "date.base": "Please choose a reservation date",
   }),
@@ -77,28 +50,62 @@ const schema = Joi.object({
   additional_info: Joi.string().optional().allow(""),
 });
 
-export default function MRFormScaffold() {
+export default function ModRFormScaffold() {
+  const location = useLocation();
+  const { reservation_id } = location.state;
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
-
-  async function checkUser() {
-    try {
-      const { data: userInfo, error } = await supabase.auth.getUser();
-      if (error) {
-        navigate("/log-in");
-      }
-      if (userInfo.user.user_metadata.account_type !== "Customer") {
-        navigate("/employee-home");
-      }
-      setUserData(userInfo);
-    } catch (error) {
-      console.log(error);
-      navigate("/");
-    }
-  }
+  const [reservationData, setReservationData] = useState(null);
+  const [restaurantData, setRestaurantData] = useState(null);
 
   useEffect(() => {
-    checkUser();
+    async function getData() {
+      try {
+        const { data: userInfo, error: user_error } =
+          await supabase.auth.getUser();
+
+        if (user_error) {
+          navigate("/log-in");
+        }
+
+        if (userInfo.user.user_metadata.account_type !== "Customer") {
+          navigate("/employee-home");
+        } else {
+          setUserData(userInfo);
+        }
+
+        const { data: reservationInfo, error: reservation_error } =
+          await supabase
+            .from("has_reservation")
+            .select("*")
+            .eq("reservation_id", reservation_id);
+
+        if (reservation_error) {
+          console.log(reservation_error);
+        } else {
+          setReservationData(reservationInfo);
+        }
+
+        const { data: restaurantName, error: restaurant_error } = await supabase
+          .from("restaurant")
+          .select("name")
+          .eq("id", reservationInfo[0].restaurant_id);
+
+        if (restaurant_error) {
+          console.log(restaurant_error);
+        } else {
+          setRestaurantData(restaurantName);
+        }
+      } catch (error) {
+        console.log(error);
+        navigate("/");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    getData();
   }, []);
 
   function getTimestampz(date, time) {
@@ -122,19 +129,17 @@ export default function MRFormScaffold() {
       formData.reservation_time,
     );
 
-    const customerName = `${userData.user.user_metadata.firstname} ${userData.user.user_metadata.lastname}`;
-
     try {
-      const { error } = await supabase.from("has_reservation").insert([
-        {
-          user_id: userData.user.id,
-          customer_name: customerName,
-          restaurant_id: formData.restaurant_id,
-          date_time: datetime,
-          priority: formData.priority,
-          additional_info: formData.additional_info,
-        },
-      ]);
+      const { error } = await supabase
+        .from("has_reservation")
+        .update([
+          {
+            date_time: datetime,
+            priority: formData.priority,
+            additional_info: formData.additional_info,
+          },
+        ])
+        .eq("reservation_id", reservation_id);
 
       if (error) {
         console.log(error);
@@ -149,7 +154,6 @@ export default function MRFormScaffold() {
   const form = useForm({
     resolver: joiResolver(schema),
     defaultValues: {
-      restaurant_id: "",
       reservation_date: "",
       reservation_time: "",
       priority: "",
@@ -157,73 +161,18 @@ export default function MRFormScaffold() {
     },
   });
 
+  if (isLoading) {
+    return <LoadingPage />;
+  }
+
   return (
     <div>
       <div className="font-poppins text-white space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="text-white text-start text-3xl sm:text-4xl">
-              Make a Reservation
+              Modify {restaurantData[0].name} Reservation
             </div>
-            <FormField
-              control={form.control}
-              name="restaurant_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Restaurant</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild className="dark">
-                      <FormControl className="text-xs sm:text-sm flex w-full">
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "justify-between w-[100%] mx-auto mb-2",
-                            !field.value,
-                          )}
-                        >
-                          {field.value
-                            ? restaurants.find(
-                                (restaurant) => restaurant.id === field.value,
-                              )?.name
-                            : "Pick a Restaurant"}
-                          <ChevronsUpDown className="opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="dark">
-                      <Command>
-                        <CommandInput placeholder="Search for a Restaurant" />
-                        <CommandList>
-                          <CommandEmpty>No restaurants found.</CommandEmpty>
-                          <CommandGroup>
-                            {restaurants.map((restaurant) => (
-                              <CommandItem
-                                value={restaurant.name}
-                                key={restaurant.id}
-                                onSelect={() => {
-                                  form.setValue("restaurant_id", restaurant.id);
-                                }}
-                              >
-                                {restaurant.name}
-                                <Check
-                                  className={cn(
-                                    "ml-auto",
-                                    restaurant.id === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="reservation_date"
@@ -335,6 +284,7 @@ export default function MRFormScaffold() {
                   <FormLabel>Additional Information</FormLabel>
                   <FormControl className="text-xs sm:text-sm">
                     <Textarea
+                      placeholder={reservationData[0].additional_info}
                       className="border-zinc-600 focus:border-white resize-none"
                       {...field}
                       {...form.register("additional_info")}
@@ -349,7 +299,7 @@ export default function MRFormScaffold() {
               variant="secondary"
               type="submit"
             >
-              Make Reservation
+              Modify Reservation
             </Button>
           </form>
         </Form>
