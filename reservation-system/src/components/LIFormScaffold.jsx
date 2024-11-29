@@ -8,6 +8,8 @@ import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "./ui/toaster";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -40,29 +42,31 @@ const schema = Joi.object({
 
 export default function LIFormScaffold() {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   async function onSubmit(form_data) {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: form_data.email,
         password: form_data.password,
       });
 
-      if (data.session) {
-        console.log("login success");
-      }
       if (error) {
         console.log(error);
-      }
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user.user_metadata.account_type === "Customer") {
-        navigate("/customer-home");
+        toast({
+          title: "User account doesn't exist!",
+          description: "Try creating an account instead.",
+        });
       } else {
-        navigate("/employee-home");
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user.user_metadata.account_type === "Customer") {
+          navigate("/customer-home");
+        } else {
+          navigate("/employee-home");
+        }
       }
     } catch (error) {
       console.log(error);
@@ -79,6 +83,7 @@ export default function LIFormScaffold() {
 
   return (
     <div>
+      <Toaster />
       <div className="font-poppins text-white space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
