@@ -38,6 +38,29 @@ export default function ReserveDataTable() {
   const [restaurantData, setRestaurantData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  async function deleteReservation(reservation_id) {
+    try {
+      const { error: to_null_error } = await supabase
+        .from("has_reservation")
+        .update({ priority: null })
+        .eq("reservation_id", reservation_id);
+      if (to_null_error) {
+        console.log(to_null_error);
+      }
+
+      const { error } = await supabase
+        .from("has_reservation")
+        .delete()
+        .eq("reservation_id", reservation_id);
+
+      if (error) {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     async function getData() {
       try {
@@ -67,9 +90,10 @@ export default function ReserveDataTable() {
               event: "*",
               schema: "public",
               table: "has_reservation",
-              filter: `restaurant_id=eq.(${restaurantInfo[0].restaurant_id})`,
+              filter: `restaurant_id=in.(${restaurantInfo[0].restaurant_id})`,
             },
             (payload) => {
+              console.log(payload);
               switch (payload.eventType) {
                 case "INSERT":
                   setReservations((prev) => [...prev, payload.new]);
@@ -77,7 +101,7 @@ export default function ReserveDataTable() {
                 case "UPDATE":
                   setReservations((prev) =>
                     prev.map((item) =>
-                      item.reservation_id === payload.new.id
+                      item.reservation_id === payload.new.reservation_id
                         ? payload.new
                         : item,
                     ),
@@ -85,9 +109,7 @@ export default function ReserveDataTable() {
                   break;
                 case "DELETE":
                   setReservations((prev) =>
-                    prev.filter(
-                      (item) => item.reservation_id !== payload.old.id,
-                    ),
+                    prev.filter((item) => item.id !== payload.old.id),
                   );
                   break;
               }
@@ -146,6 +168,8 @@ export default function ReserveDataTable() {
                         <TableCell>
                           {reservation.priority === "high" ? (
                             <Badge variant="destructive">High</Badge>
+                          ) : reservation.priority === null ? (
+                            <Badge variant="outline">Removed</Badge>
                           ) : (
                             <Badge variant="secondary">Standard</Badge>
                           )}
@@ -186,9 +210,13 @@ export default function ReserveDataTable() {
                               </DropdownMenuSub>
                               <DropdownMenuItem
                                 className="text-destructive"
-                                onClick={() => console.log(reservation.id)}
+                                onClick={() =>
+                                  void deleteReservation(
+                                    reservation.reservation_id,
+                                  )
+                                }
                               >
-                                Delete Reservation
+                                Remove Reservation
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

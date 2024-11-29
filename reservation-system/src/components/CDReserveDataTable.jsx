@@ -41,16 +41,41 @@ export default function ReserveDataTable() {
   const [restaurantData, setRestaurantData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  async function deleteReservation(reservation_id) {
+    try {
+      const { error: to_null_error } = await supabase
+        .from("has_reservation")
+        .update({ priority: null })
+        .eq("reservation_id", reservation_id);
+      if (to_null_error) {
+        console.log(to_null_error);
+      }
+
+      const { error } = await supabase
+        .from("has_reservation")
+        .delete()
+        .eq("reservation_id", reservation_id);
+
+      if (error) {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     async function getData() {
       try {
         const { data: userInfo } = await supabase.auth.getUser();
         setUserData(userInfo);
+
         const { data: userReservation } = await supabase
           .from("has_reservation")
-          .select("restaurant_id, date_time, priority, additional_info")
+          .select("*")
           .eq("user_id", userInfo.user.id);
         setReservations(userReservation);
+
         const { data: restaurantInfo } = await supabase
           .from("restaurant")
           .select("*")
@@ -68,9 +93,10 @@ export default function ReserveDataTable() {
               event: "*",
               schema: "public",
               table: "has_reservation",
-              filter: `user_id=eq.(${userInfo.user.id})`,
+              filter: `user_id=in.(${userInfo.user.id})`,
             },
             (payload) => {
+              console.log(payload);
               switch (payload.eventType) {
                 case "INSERT":
                   setReservations((prev) => [...prev, payload.new]);
@@ -78,7 +104,7 @@ export default function ReserveDataTable() {
                 case "UPDATE":
                   setReservations((prev) =>
                     prev.map((item) =>
-                      item.reservation_id === payload.new.id
+                      item.reservation_id === payload.new.reservation_id
                         ? payload.new
                         : item,
                     ),
@@ -86,9 +112,7 @@ export default function ReserveDataTable() {
                   break;
                 case "DELETE":
                   setReservations((prev) =>
-                    prev.filter(
-                      (item) => item.reservation_id !== payload.old.id,
-                    ),
+                    prev.filter((item) => item.id !== payload.old.id),
                   );
                   break;
               }
@@ -138,7 +162,7 @@ export default function ReserveDataTable() {
                   </TableHeader>
                   <TableBody>
                     {reservations.map((reservation) => (
-                      <TableRow key={reservation.restaurant_id}>
+                      <TableRow key={reservation.reservation_id}>
                         <TableCell>
                           {
                             restaurantData.find(
@@ -155,6 +179,8 @@ export default function ReserveDataTable() {
                         <TableCell>
                           {reservation.priority === "high" ? (
                             <Badge variant="destructive">High</Badge>
+                          ) : reservation.priority === null ? (
+                            <Badge variant="outline">Cancelled</Badge>
                           ) : (
                             <Badge variant="secondary">Standard</Badge>
                           )}
@@ -188,9 +214,13 @@ export default function ReserveDataTable() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive"
-                                onClick={() => console.log(reservation.id)}
+                                onClick={() =>
+                                  void deleteReservation(
+                                    reservation.reservation_id,
+                                  )
+                                }
                               >
-                                Delete Reservation
+                                Cancel Reservation
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

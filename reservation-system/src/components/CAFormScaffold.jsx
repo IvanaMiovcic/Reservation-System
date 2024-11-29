@@ -24,6 +24,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "./ui/toaster";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -101,6 +103,7 @@ const schema = Joi.object({
 
 export default function CAFormScaffold() {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   async function onSubmit(form_data) {
     try {
@@ -117,11 +120,13 @@ export default function CAFormScaffold() {
         },
       });
       if (error) {
-        console.log(error);
-      }
-
-      if (form_data.restaurant_id) {
-        try {
+        console.error(error);
+        toast({
+          title: "User account already exists!",
+          description: "Try logging in instead.",
+        });
+      } else {
+        if (form_data.restaurant_id) {
           const {
             data: { user },
           } = await supabase.auth.getUser();
@@ -134,19 +139,19 @@ export default function CAFormScaffold() {
 
           if (error_worksAt) {
             console.log(error_worksAt);
+          } else {
+            if (dbData) {
+              if (data.user.user_metadata.account_type === "Customer") {
+                navigate("/customer-home");
+              } else {
+                navigate("/employee-home");
+              }
+            }
           }
-        } catch (error) {
-          console.log(error);
         }
       }
     } catch (error) {
       console.log(error);
-    }
-
-    if (form_data.account_type === "Customer") {
-      navigate("/customer-home");
-    } else {
-      navigate("/employee-home");
     }
   }
 
@@ -166,6 +171,7 @@ export default function CAFormScaffold() {
 
   return (
     <div>
+      <Toaster />
       <div className="font-poppins text-white space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
