@@ -13,6 +13,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './setupTests.js',
-    css: true
+    css: true,
+    reporters: ['basic'], // Uses the basic reporter instead of default
+    silent: true,
   }
 });
