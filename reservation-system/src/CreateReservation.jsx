@@ -5,7 +5,7 @@ import MRFormScaffold from "./components/MRFormScaffold";
 export default function CreateReservation() {
   return (
     <div className="bg-black flex flex-col items-center w-screen">
-      <div className="h-screen w-9/12 flex flex-col">
+      <div className="h-screen w-9/12 flex flex-col pt-4">
         <BackHeader backLink="/customer-home" />
         <div className="flex flex-row flex-grow justify-center">
           <div className="flex flex-row justify-center items-center">

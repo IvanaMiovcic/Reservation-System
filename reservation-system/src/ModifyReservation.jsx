@@ -1,80 +1,21 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import BackHeader from "./components/BackHeader";
+import Footer from "./components/Footer";
+import ModRFormScaffold from "./components/ModRFormScaffold";
 
-function ModifyReservation() {
-  const [time, setTime] = useState('');
-  const [partySize, setPartySize] = useState('');
-  const [seatingType, setSeatingType] = useState('');
-  const [seatingLocation, setSeatingLocation] = useState('');
-
-  const handleModifyReservation = (e) => {
-    e.preventDefault(); // prevents page from refreshing when you hit submit.
-
-    // Placeholder for actual reservation creation logic
-    console.log('Creating reservation with:', {
-      time,
-      partySize,
-      seatingType,
-      seatingLocation,
-    });
-  };
-
-  const handleCancellation = (e) => {
-    // Implement logic for cancelling reservation
-    console.log('Reservation Cancelled')
-  };
-
+export default function ModifyReservation() {
   return (
-    <div>
-      <form onSubmit={handleModifyReservation}>
-        <h2>Modify Reservation</h2>
-        <label for="time">Time</label>
-        <input
-          type="text"
-          id="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          required
-        />
-        <br></br>
-        <label for="size">Party Size</label>
-        <select 
-          id="size"
-          value={partySize} onChange={(e) => setPartySize(e.target.value)}>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-        </select>
-        <br></br>
-        <label for="type">Seating Type</label>
-        <select 
-          id="type"
-          value={seatingType} onChange={(e) => setSeatingType(e.target.value)}>
-          <option value="Standard">Standard</option>
-          <option value="Bar">Bar</option>
-        </select>
-        <br></br>
-        <label for="location">Seating Location</label>
-        <select 
-          id="location"
-          value={seatingType} onChange={(e) => setSeatingLocation(e.target.value)}>
-          <option value="Indoor">Indoor</option>
-          <option value="Outdoor">Outdoor</option>
-        </select>
-        <br></br>
-        <button type="submit">Modify Reservation</button>
-      </form>
-      <div>
-        <button onClick={handleCancellation}> Cancel Reservation</button>
+    <div className="bg-black flex flex-col items-center w-screen">
+      <div className="h-screen w-9/12 flex flex-col pt-4">
+        <BackHeader backLink="/customer-home" />
+        <div className="flex flex-row flex-grow justify-center">
+          <div className="flex flex-row justify-center items-center">
+            <div className="w-11/12">
+              <ModRFormScaffold />
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
-      <Link to="/customer-home">Go Back</Link>
     </div>
   );
 }
-
-export default ModifyReservation;
