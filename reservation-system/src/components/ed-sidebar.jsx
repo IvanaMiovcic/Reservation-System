@@ -57,22 +57,22 @@ export function AppSidebar({ ...props }) {
         <Calendar mode="single" />
         <SidebarSeparator className="mx-0" />
         <SidebarMenu className="gap-4 mt-4">
-          <SidebarMenuItem>
-            <Link to="/modify-floorplan">
-              <SidebarMenuButton className="w-[93%] m-auto">
-                <Layers3 />
-                Manage Floorplans
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
+          {userData.user.user_metadata === "Manager" ? (
+            <SidebarMenuItem>
+              <Link to="/modify-floorplan">
+                <SidebarMenuButton className="w-[93%] m-auto">
+                  <Layers3 />
+                  Manage Floorplans
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          ) : (
+            <div></div>
+          )}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton></SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarMenu></SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
