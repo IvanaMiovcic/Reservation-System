@@ -31,6 +31,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import LoadingPage from "./LoadingPage";
 import moment from "moment/moment";
+import { Link } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -78,9 +79,7 @@ export default function ReserveDataTable() {
         setRestaurantData(restaurantInfo);
         const { data: restaurantReservation } = await supabase
           .from("has_reservation")
-          .select(
-            "reservation_id, user_id, customer_name, date_time, priority, additional_info",
-          )
+          .select("*")
           .in(
             "restaurant_id",
             restaurantInfo.map((item) => item.restaurant_id),
@@ -190,6 +189,17 @@ export default function ReserveDataTable() {
                               <DropdownMenuLabel>
                                 Options for {reservation.customer_name}
                               </DropdownMenuLabel>
+                              <Link
+                                to="/send-notification"
+                                state={{
+                                  userID: reservation.user_id,
+                                  restaurantID: reservation.restaurant_id,
+                                }}
+                              >
+                                <DropdownMenuItem>
+                                  Notify Customer
+                                </DropdownMenuItem>
+                              </Link>
                               <DropdownMenuSeparator />
                               <HoverCard>
                                 <HoverCardTrigger asChild>
