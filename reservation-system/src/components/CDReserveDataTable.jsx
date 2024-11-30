@@ -29,6 +29,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import LoadingPage from "./LoadingPage";
 import moment from "moment/moment";
+import { Link } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -207,11 +208,16 @@ export default function ReserveDataTable() {
                                   </DropdownMenuItem>
                                 </DropdownMenuSubContent>
                               </DropdownMenuSub>
-                              <DropdownMenuItem
-                                onClick={() => console.log(reservation.id)}
+                              <Link
+                                to="/modify-reservation"
+                                state={{
+                                  reservation_id: reservation.reservation_id,
+                                }}
                               >
-                                Modify Reservation
-                              </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  Modify Reservation
+                                </DropdownMenuItem>
+                              </Link>
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() =>
