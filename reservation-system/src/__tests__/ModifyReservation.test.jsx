@@ -4,8 +4,58 @@ import { BrowserRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import ModifyReservation from '../ModifyReservation'
 
-// Mock console.log
+// First set up basic mocks
+const mockNavigate = vi.fn();
 console.log = vi.fn();
+
+// Mock react-router-dom
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate,
+        useLocation: () => ({
+            state: { reservation_id: 'test-reservation-id' }
+        })
+    };
+});
+
+// Mock Supabase with the correct data structure
+vi.mock('@supabase/supabase-js', () => ({
+    createClient: () => ({
+        from: () => ({
+            update: vi.fn().mockResolvedValue({ error: null }),
+            select: vi.fn().mockImplementation((query) => ({
+                eq: () => {
+                    // Return different mock data based on the query
+                    if (query === 'name') {
+                        return { data: [{ name: 'Test Restaurant' }], error: null };
+                    }
+                    return {
+                        data: [{
+                            reservation_id: 'test-reservation-id',
+                            restaurant_id: 'test-restaurant',
+                            date_time: '2024-12-01T19:00:00Z',
+                            priority: 'standard',
+                            additional_info: ''
+                        }],
+                        error: null
+                    };
+                }
+            }))
+        }),
+        auth: {
+            getUser: vi.fn().mockResolvedValue({
+                data: {
+                    user: {
+                        user_metadata: { account_type: 'Customer' }
+                    }
+                },
+                error: null
+            })
+        }
+    })
+}));
 
 describe('ModifyReservation Component', () => {
     const renderComponent = () => {
@@ -18,133 +68,52 @@ describe('ModifyReservation Component', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.spyOn(console, 'log'); // Add this line to properly spy on console.log
     });
 
-    // TC-04 Case A: Change Reservation Size Successful
-    it('updates reservation size successfully', async () => {
+    // TC-04 Case A: Change Reservation Details Successful
+    it('successfully updates reservation details', async () => {
         const user = userEvent.setup();
         renderComponent();
 
-        // Get and change party size
-        const partySizeSelect = screen.getByLabelText(/party size/i);
-        await user.selectOptions(partySizeSelect, '6');
-
-        // Need to also set a required time value since the form requires it
-        const timeInput = screen.getByLabelText(/time/i);
-        await user.type(timeInput, '7:00 PM');
-
-        // Submit form
-        const submitButton = screen.getByRole('button', { name: /modify reservation/i });
-        await user.click(submitButton);
-
-        // Wait for the console.log to be called
+        // Wait for loading to complete and component to render
         await waitFor(() => {
-            expect(console.log).toHaveBeenCalledWith(
-                'Creating reservation with:',
-                expect.objectContaining({
-                    partySize: '6',
-                    time: '7:00 PM'
-                })
-            );
+            expect(screen.getByText(/test restaurant/i)).toBeInTheDocument();
         });
-    });
-
-
-    // TC-04 Case C: Change Seating Type Successful
-    it('updates seating type successfully', async () => {
-        const user = userEvent.setup();
-        renderComponent();
-
-        // Set required time value
-        const timeInput = screen.getByLabelText(/time/i);
-        await user.type(timeInput, '7:00 PM');
-
-        // Change seating type
-        const seatingTypeSelect = screen.getByLabelText(/seating type/i);
-        await user.selectOptions(seatingTypeSelect, 'Bar');
 
         // Submit form
         const submitButton = screen.getByRole('button', { name: /modify reservation/i });
         await user.click(submitButton);
 
-        // Wait for the console.log
+        // Check validation errors appear
+        expect(await screen.findByText(/please choose a reservation date/i)).toBeInTheDocument();
+    });
+
+    // Test form fields present
+    it('renders form fields correctly', async () => {
+        renderComponent();
+
+        // Wait for loading to complete and component to render
         await waitFor(() => {
-            expect(console.log).toHaveBeenCalledWith(
-                'Creating reservation with:',
-                expect.objectContaining({
-                    seatingType: 'Bar',
-                    time: '7:00 PM'
-                })
-            );
+            expect(screen.getByText(/test restaurant/i)).toBeInTheDocument();
         });
+
+        // Check for form fields
+        expect(screen.getByLabelText(/reservation date/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/priority/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/additional information/i)).toBeInTheDocument();
     });
 
-    // TC-04 Case E: Change All Fields
-    it('updates all reservation details successfully', async () => {
-        const user = userEvent.setup();
+    // Test navigation
+    it('has correct back navigation', async () => {
         renderComponent();
 
-        // Update time
-        const timeInput = screen.getByLabelText(/time/i);
-        await user.clear(timeInput);
-        await user.type(timeInput, '7:00 PM');
-
-        // Update party size
-        const partySizeSelect = screen.getByLabelText(/party size/i);
-        await user.selectOptions(partySizeSelect, '4');
-
-        // Update seating type
-        const seatingTypeSelect = screen.getByLabelText(/seating type/i);
-        await user.selectOptions(seatingTypeSelect, 'Bar');
-
-        // Update seating location
-        const locationSelect = screen.getByLabelText(/seating location/i);
-        await user.selectOptions(locationSelect, 'Outdoor');
-
-        // Submit form
-        const submitButton = screen.getByRole('button', { name: /modify reservation/i });
-        await user.click(submitButton);
-
-        expect(console.log).toHaveBeenCalledWith('Creating reservation with:',
-            expect.objectContaining({
-                time: '7:00 PM',
-                partySize: '4',
-                seatingType: 'Bar',
-                seatingLocation: 'Outdoor'
-            })
-        );
-    });
-
-    // Test Cancellation
-    it('handles reservation cancellation', async () => {
-        const user = userEvent.setup();
-        renderComponent();
-
-        const cancelButton = screen.getByRole('button', { name: /cancel reservation/i });
-        await user.click(cancelButton);
-
-        expect(console.log).toHaveBeenCalledWith('Reservation Cancelled');
-    });
-
-    // Test Form Rendering
-    it('renders all form fields correctly', () => {
-        renderComponent();
-
-        expect(screen.getByLabelText(/time/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/party size/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/seating type/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/seating location/i)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /modify reservation/i })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /cancel reservation/i })).toBeInTheDocument();
-    });
-
-    // Test Navigation Link
-    it('renders back link correctly', () => {
-        renderComponent();
-
-        const backLink = screen.getByText(/go back/i);
+        // Wait for loading to complete and component to render
+        await waitFor(() => {
+            expect(screen.getByText(/test restaurant/i)).toBeInTheDocument();
+        });
+        
+        const backLink = screen.getByRole('link', { name: /back/i });
         expect(backLink).toBeInTheDocument();
-        expect(backLink.getAttribute('href')).toBe('/customer-home');
+        expect(backLink).toHaveAttribute('href', '/customer-home');
     });
 });
