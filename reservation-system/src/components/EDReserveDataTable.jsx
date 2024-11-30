@@ -21,6 +21,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Ellipsis } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -186,28 +191,28 @@ export default function ReserveDataTable() {
                                 Options for {reservation.customer_name}
                               </DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  Notify customer
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem>
-                                    Ready for customer
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  View reservation details
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem>
-                                    {reservation.additional_info === null
-                                      ? reservation.additional_info
-                                      : "No additional details"}
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
+                              <HoverCard>
+                                <HoverCardTrigger asChild>
+                                  <div>
+                                    <DropdownMenuItem>
+                                      View Additional Details
+                                    </DropdownMenuItem>
+                                  </div>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="font-poppins">
+                                  <div className="">
+                                    <div className="p-2">
+                                      Additional Details
+                                    </div>
+                                    <div className="text-sm text-muted-foreground p-2">
+                                      {reservation.additional_info
+                                        ? reservation.additional_info
+                                        : "No additional details provided"}
+                                    </div>
+                                  </div>
+                                </HoverCardContent>
+                              </HoverCard>
+
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() =>
