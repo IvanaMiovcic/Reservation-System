@@ -1,7 +1,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -16,16 +15,19 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Ellipsis } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import LoadingPage from "./LoadingPage";
 import moment from "moment/moment";
+import { Link } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -73,9 +75,7 @@ export default function ReserveDataTable() {
         setRestaurantData(restaurantInfo);
         const { data: restaurantReservation } = await supabase
           .from("has_reservation")
-          .select(
-            "reservation_id, user_id, customer_name, date_time, priority, additional_info",
-          )
+          .select("*")
           .in(
             "restaurant_id",
             restaurantInfo.map((item) => item.restaurant_id),
@@ -185,29 +185,40 @@ export default function ReserveDataTable() {
                               <DropdownMenuLabel>
                                 Options for {reservation.customer_name}
                               </DropdownMenuLabel>
+                              <Link
+                                to="/send-notification"
+                                state={{
+                                  userID: reservation.user_id,
+                                  restaurantID: reservation.restaurant_id,
+                                }}
+                              >
+                                <DropdownMenuItem>
+                                  Notify Customer
+                                </DropdownMenuItem>
+                              </Link>
                               <DropdownMenuSeparator />
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  Notify customer
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem>
-                                    Ready for customer
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  View reservation details
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem>
-                                    {reservation.additional_info === null
-                                      ? reservation.additional_info
-                                      : "No additional details"}
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
+                              <HoverCard>
+                                <HoverCardTrigger asChild>
+                                  <div>
+                                    <DropdownMenuItem>
+                                      View Additional Details
+                                    </DropdownMenuItem>
+                                  </div>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="font-poppins">
+                                  <div className="">
+                                    <div className="p-2">
+                                      Additional Details
+                                    </div>
+                                    <div className="text-sm text-muted-foreground p-2">
+                                      {reservation.additional_info
+                                        ? reservation.additional_info
+                                        : "No additional details provided"}
+                                    </div>
+                                  </div>
+                                </HoverCardContent>
+                              </HoverCard>
+
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() =>

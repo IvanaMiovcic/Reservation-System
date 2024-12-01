@@ -1,7 +1,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -13,23 +12,24 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Ellipsis } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import LoadingPage from "./LoadingPage";
 import moment from "moment/moment";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "./ui/toaster";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -41,6 +41,7 @@ export default function ReserveDataTable() {
   const [userData, setUserData] = useState(null);
   const [restaurantData, setRestaurantData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   async function deleteReservation(reservation_id) {
     try {
@@ -86,7 +87,7 @@ export default function ReserveDataTable() {
           );
         setRestaurantData(restaurantInfo);
 
-        const channel = supabase
+        const reservationChannel = supabase
           .channel("realtime_updates")
           .on(
             "postgres_changes",
@@ -121,7 +122,29 @@ export default function ReserveDataTable() {
           )
           .subscribe();
 
-        return () => supabase.removeChannel(channel);
+        const notificationChannel = supabase
+          .channel("realtime_updates")
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "got_notification",
+              filter: `user_id=in.(${userInfo.user.id})`,
+            },
+            (payload) => {
+              toast({
+                title: `New notification from ${restaurantInfo.find((item) => item.id === payload.new.restaurant_id)?.name}`,
+                description: `${payload.new.notif_content}`,
+              });
+            },
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(reservationChannel);
+          supabase.removeChannel(notificationChannel);
+        };
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -138,6 +161,7 @@ export default function ReserveDataTable() {
 
   return (
     <div className="h-[100%]">
+      <Toaster />
       <div className="flex flex-col rounded-md gap-3 p-5 h-full border">
         <div className="flex flex-row space-x-3">
           <div className="text-white text-xl">Reservations</div>
@@ -193,21 +217,33 @@ export default function ReserveDataTable() {
                                 <Ellipsis />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent
+                              align="end"
+                              className="font-poppins"
+                            >
                               <DropdownMenuLabel>Options</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  View reservation details
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem>
-                                    {reservation.additional_info === null
-                                      ? reservation.additional_info
-                                      : "No additional details"}
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
+                              <HoverCard>
+                                <HoverCardTrigger asChild>
+                                  <div>
+                                    <DropdownMenuItem>
+                                      View Additional Details
+                                    </DropdownMenuItem>
+                                  </div>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="font-poppins">
+                                  <div className="">
+                                    <div className="p-2">
+                                      Additional Details
+                                    </div>
+                                    <div className="text-sm text-muted-foreground p-2">
+                                      {reservation.additional_info
+                                        ? reservation.additional_info
+                                        : "No additional details provided"}
+                                    </div>
+                                  </div>
+                                </HoverCardContent>
+                              </HoverCard>
                               <Link
                                 to="/modify-reservation"
                                 state={{
