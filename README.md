@@ -1,12 +1,12 @@
 # Reservation-System
 
-# Before running the application for the first time, please ensure that the neccessary files are installed.
-# Installation of necessary files: 
+Before running the application for the first time, please ensure that the neccessary files are installed.
+Installation of necessary files: 
 
 npm install 
 
-# To run application: 
-# from reservation-system directory, run the following command: 
+To run application: 
+from reservation-system directory, run the following command: 
 
 npm run dev
 
