@@ -41,7 +41,6 @@ export default function EmailScaffold(props) {
   const userID = props.userID;
   const restaurantID = props.restaurantID;
   const navigate = useNavigate();
-
   const { toast } = useToast();
 
   async function onSubmit(formData) {

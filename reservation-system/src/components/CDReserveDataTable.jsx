@@ -28,6 +28,8 @@ import { createClient } from "@supabase/supabase-js";
 import LoadingPage from "./LoadingPage";
 import moment from "moment/moment";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "./ui/toaster";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
@@ -39,6 +41,7 @@ export default function ReserveDataTable() {
   const [userData, setUserData] = useState(null);
   const [restaurantData, setRestaurantData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   async function deleteReservation(reservation_id) {
     try {
@@ -84,7 +87,7 @@ export default function ReserveDataTable() {
           );
         setRestaurantData(restaurantInfo);
 
-        const channel = supabase
+        const reservationChannel = supabase
           .channel("realtime_updates")
           .on(
             "postgres_changes",
@@ -119,7 +122,29 @@ export default function ReserveDataTable() {
           )
           .subscribe();
 
-        return () => supabase.removeChannel(channel);
+        const notificationChannel = supabase
+          .channel("realtime_updates")
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "got_notification",
+              filter: `user_id=in.(${userInfo.user.id})`,
+            },
+            (payload) => {
+              toast({
+                title: `New notification from ${restaurantInfo.find((item) => item.id === payload.new.restaurant_id)?.name}`,
+                description: `${payload.new.notif_content}`,
+              });
+            },
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(reservationChannel);
+          supabase.removeChannel(notificationChannel);
+        };
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -136,6 +161,7 @@ export default function ReserveDataTable() {
 
   return (
     <div className="h-[100%]">
+      <Toaster />
       <div className="flex flex-col rounded-md gap-3 p-5 h-full border">
         <div className="flex flex-row space-x-3">
           <div className="text-white text-xl">Reservations</div>
