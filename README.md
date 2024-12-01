@@ -1,14 +1,21 @@
 # Reservation-System
 
 Before running the application for the first time, please ensure that the neccessary files are installed.
+
+
 Installation of necessary files: 
-
+```
 npm install 
+```
 
-To run application: 
-from reservation-system directory, run the following command: 
-
+To run the application, cd into the reservation-system directory and run the following command: 
+```
 npm run dev
+```
+
+###### ***The commands above only work if you have been given the .env file.**
+
+---
 
 ### Dummy data for testing
 ```javascript
