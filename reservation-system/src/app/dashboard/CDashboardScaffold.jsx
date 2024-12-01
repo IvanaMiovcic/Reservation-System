@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import LoadingPage from "@/components/LoadingPage";
 

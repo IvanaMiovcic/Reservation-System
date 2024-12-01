@@ -32,7 +32,7 @@ const schema = Joi.object({
         "At least 8 characters with numbers, uppercase, lowercase, and special characters",
     }),
   email: Joi.string()
-    .email({ tlds: { allow: ["com", "net"] } })
+    .email({ tlds: { allow: ["com", "net", "ca"] } })
     .required()
     .messages({
       "string.email": "Email should be in a valid format",
