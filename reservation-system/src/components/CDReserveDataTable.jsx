@@ -88,7 +88,7 @@ export default function ReserveDataTable() {
         setRestaurantData(restaurantInfo);
 
         const reservationChannel = supabase
-          .channel("realtime_updates")
+          .channel("reservation_updates")
           .on(
             "postgres_changes",
             {
@@ -123,7 +123,7 @@ export default function ReserveDataTable() {
           .subscribe();
 
         const notificationChannel = supabase
-          .channel("realtime_updates")
+          .channel("notification_updates")
           .on(
             "postgres_changes",
             {
