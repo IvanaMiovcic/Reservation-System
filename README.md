@@ -26,7 +26,7 @@ Live deployment
 ---
 https://smartq.onrender.com
 
-###### *It might take a while for the app to load on first visit. The app is hosted on Render's hobby plan, which spins down the app after a period of inactivity. The slow load isn't caused by a lack of performance from the app itself.
+###### *It might take a while for the app to load on first visit. The app is hosted on Render's hobby plan, which spins down the app after a period of inactivity. The slow load isn't caused by a lack of performance in the app itself.
 
 To appreciate the realtime functionalities of the web app, consider running the app on two separate browsers, side by side. Log in with a customer account on one instance and either an employee or a manager account on the other instance, then test the app. 
 
