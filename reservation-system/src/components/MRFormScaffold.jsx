@@ -39,27 +39,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Textarea } from "./ui/textarea";
+import LoadingPage from "./LoadingPage";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
   import.meta.env.VITE_SUPA_ANON,
 );
-
-async function getRestaurants() {
-  try {
-    let { data, error } = await supabase.from("restaurant").select("*");
-
-    if (error) {
-      console.log(error);
-    } else {
-      return data;
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-const restaurants = await getRestaurants();
 
 const schema = Joi.object({
   restaurant_id: Joi.string().required().messages({
@@ -80,6 +65,8 @@ const schema = Joi.object({
 export default function MRFormScaffold() {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
+  const [restaurants, setRestaurants] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   async function checkUser() {
     try {
@@ -91,9 +78,20 @@ export default function MRFormScaffold() {
         navigate("/employee-home");
       }
       setUserData(userInfo);
+      let { data, error: restaurantError } = await supabase
+        .from("restaurant")
+        .select("*");
+
+      if (restaurantError) {
+        console.log(restaurantError);
+      } else {
+        setRestaurants(data);
+      }
     } catch (error) {
       console.log(error);
       navigate("/");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -156,6 +154,10 @@ export default function MRFormScaffold() {
       additional_info: "",
     },
   });
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <div>
