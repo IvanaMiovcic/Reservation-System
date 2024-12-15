@@ -1,5 +1,37 @@
-# Reservation-System
+# SmartQ Reservation System
 
+This web application was created as the term project for the CPS 731 Software Engineering I course at Toronto Metropolitan University for the Fall 2024 semester.
+
+The aim of the web application is to provide a unified interface for restaurant staff to view and manage reservations and track the availability of tables, as well as for customers to make reservations at their favorite restaurants in as easy a manner as possible.
+
+The web app makes extensive use of Supabase's realtime updates feature to subscribe to database changes for scenarios where a reservation is made for example. A simple in-app notification system was also create to take advantage of the realtime updates. This notification system allows a restaurant to send notifications to their reservees and keep them updated.
+
+A drag-and-drop floor plan creator was also implement which allows managers to intuitively create custom floor plans for restaurants.
+
+Created with: 
+- **React + Vite**
+- **Node.js**
+- **Supabase**
+- **PostgreSQL**
+- **TailwindCSS**
+- **Shadcn/ui**.
+  
+Tested with: 
+- **Vitest**
+- **React Testing Library**
+- **System test cases** derived from the project use case model.
+
+
+Live deployment
+---
+https://smartq.onrender.com
+
+To appreciate the realtime functionalities of the web app, consider running the app on two separate browsers, side by side. Log in with a customer account on one instance and either an employee or a manager account on the other instance, then test the app. 
+
+###### *Manager accounts have access to more features than employee accounts.
+
+Local Deployment
+---
 Before running the application for the first time, please ensure that the neccessary files are installed.
 
 
@@ -13,11 +45,15 @@ To run the application, cd into the reservation-system directory and run the fol
 npm run dev
 ```
 
-###### ***The commands above only work if you have been given the .env file.**
+###### *The commands above only work if you have been given the .env file.
 
+Fake credentials for testing
 ---
+The following credentials were arbitrarily created and some were used to manually test the application. 
 
-### Dummy data for testing
+
+You may use any of them or create your own fake credentials to try out the app.
+
 ```javascript
 [
   {  //account created; use for login; customer
