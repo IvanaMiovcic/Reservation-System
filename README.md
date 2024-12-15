@@ -1,6 +1,6 @@
 # SmartQ Reservation System
 
-This web application was created as the term project for the CPS 731 Software Engineering I course at Toronto Metropolitan University for the Fall 2024 semester.
+This web application is the term project for the CPS 731 Software Engineering I course at Toronto Metropolitan University for the Fall 2024 semester.
 
 The aim of the web application is to provide a unified interface for restaurant staff to view and manage reservations and track the availability of tables, as well as for customers to make reservations at their favorite restaurants in as easy a manner as possible.
 
