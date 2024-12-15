@@ -14,7 +14,7 @@ Created with:
 - **Supabase**
 - **PostgreSQL**
 - **TailwindCSS**
-- **Shadcn/ui**.
+- **Shadcn/ui**
   
 Tested with: 
 - **Vitest**
