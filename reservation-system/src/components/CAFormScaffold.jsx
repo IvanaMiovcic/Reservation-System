@@ -1,5 +1,5 @@
 import Joi from "joi";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
@@ -31,22 +31,6 @@ const supabase = createClient(
   import.meta.env.VITE_SUPA_URL,
   import.meta.env.VITE_SUPA_ANON,
 );
-
-async function getRestaurants() {
-  try {
-    let { data, error } = await supabase.from("restaurant").select("*");
-
-    if (error) {
-      console.log(error);
-    } else {
-      return data;
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-const restaurants = await getRestaurants();
 
 const schema = Joi.object({
   firstname: Joi.string().min(2).required().messages({
@@ -104,6 +88,25 @@ const schema = Joi.object({
 export default function CAFormScaffold() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [restaurants, setRestaurants] = useState(null);
+
+  useEffect(() => {
+    async function getRestaurants() {
+      try {
+        let { data, error } = await supabase.from("restaurant").select("*");
+
+        if (error) {
+          console.log(error);
+        } else {
+          setRestaurants(data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    getRestaurants();
+  }, []);
 
   async function onSubmit(form_data) {
     try {
