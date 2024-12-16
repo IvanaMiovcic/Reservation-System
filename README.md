@@ -4,9 +4,9 @@ This web application is the term project for the CPS 731 Software Engineering I 
 
 The aim of the web application is to provide a unified interface for restaurant staff to view and manage reservations and track the availability of tables, and for customers to make reservations at their favorite restaurants in as easy a manner as possible.
 
-The web app makes extensive use of Supabase's realtime updates feature to subscribe to database changes for scenarios where a reservation is made for example. A simple in-app notification system was also create to take advantage of the realtime updates. This notification system allows a restaurant to send notifications to their reservees and keep them updated.
+The web app makes extensive use of Supabase's realtime features to subscribe to database changes for scenarios where a reservation is made, for example. A simple in-app notification system was also created to take advantage of the realtime features. This notification system allows a restaurant to send notifications to their reservees and keep them updated.
 
-A drag-and-drop floor plan creator was also implement which allows managers to intuitively create custom floor plans for restaurants.
+A drag-and-drop floor plan creator was also implemented which allows managers to intuitively create custom floor plans for restaurants.
 
 Created with: 
 - **React + Vite**
